@@ -1,9 +1,9 @@
 MEMORY
 {
-  /* NOTE K = KiBi = 1024 bytes */
-  /* TODO Adjust these memory regions to match your device memory layout */
-  FLASH : ORIGIN = 0xBAAAAAAD, LENGTH = 0K
-  RAM : ORIGIN = 0xBAAAAAAD, LENGTH = 0K
+  VECTORS (rx) : ORIGIN = 0x00000000, LENGTH = 0x00000400
+  FLASH_PROTECTION	(rx) : ORIGIN = 0x00000400, LENGTH = 0x00000010
+  FLASH (rx) : ORIGIN = 0x00000410, LENGTH = 128K - 0x00000410
+  RAM (rwx) : ORIGIN = 0x1FFFF0C0, LENGTH = 16K - 0xC0
 }
 
 /* This is where the call stack will be allocated. */
