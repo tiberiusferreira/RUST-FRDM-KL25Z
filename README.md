@@ -1,8 +1,42 @@
-# `cortex-m-quickstart`
+# `FRDM-KL25Z using RUST`
 
-> A template for building applications for ARM Cortex-M microcontrollers
+## Progress so far:
 
-# [Documentation](https://docs.rs/cortex-m-quickstart)
+### Install toolchain (Mac instructions):
+
+#### Install arm toolchain
+brew cask install gcc-arm-embedded
+
+#### Install tools used to talk to the board
+brew install minicom openocd
+
+#### Use Rust nightly since some features needed are not stable yet
+rustup default nightly
+
+#### Install Xargo for an easy cross compiling solution
+cargo install xargo
+
+#### Get rust-src so we can get pretty source maps
+rustup component add rust-src
+
+### Compile and Run
+
+#### Compile using:
+
+xargo build --target thumbv6m-none-eabi --release
+
+#### Flash and Debug
+
+openocd -f board/frdm-kl25z.cfg **will block, leave terminal open**
+
+arm-none-eabi-gdb target/thumbv6m-none-eabi/release/cortex-m-quickstart -tui 
+
+**Type continue and watch Hello, World! be written on the other (blocked) terminal**
+
+
+# Based upon:
+
+# [cortex-m-quickstart](https://docs.rs/cortex-m-quickstart) and [Blinky demo for FRDM-KL25Z](https://github.com/0xc0170/frdm-kl25z-rust)
 
 # License
 
@@ -14,9 +48,3 @@ Licensed under either of
 - MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 
 at your option.
-
-## Contribution
-
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
-dual licensed as above, without any additional terms or conditions.
