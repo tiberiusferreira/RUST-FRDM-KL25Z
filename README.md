@@ -31,7 +31,7 @@ openocd -f board/frdm-kl25z.cfg **will block, leave terminal open**
 
 arm-none-eabi-gdb target/thumbv6m-none-eabi/release/cortex-m-quickstart -tui 
 
-**Type continue and watch Hello, World! be written on the other (blocked) terminal**
+**Type continue and watch Hello, World! be written on the other (blocked) terminal and the RED LED flash**
 
 
 # Based upon:
