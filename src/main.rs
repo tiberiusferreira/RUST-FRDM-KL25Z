@@ -174,22 +174,31 @@ fn main() {
 
     let mut stdout = hio::hstdout().unwrap();
 
-    writeln!(stdout, "Hello, world! F2").unwrap();
+    writeln!(stdout, "Hello, world!").unwrap();
 
     let sim = SystemIntegrationModule::get();
     sim.system_clock_gating_control_register_5.bitwise_inc_or(0x400);
     let port_b = Port::get(1);
-    // set control register to GPIO
+
+    // Set RED LED control register to GPIO
     port_b.pin_control_register[18].set(1 << 8);
+    // Set GREEN LED control register to GPIO
+    port_b.pin_control_register[19].set(1 << 8);
 
     let ptb = Gpio::get(1);
-    ptb.port_data_direction_register.set(1 << 18);
+    ptb.port_data_direction_register.set(0b11 << 18);
+    ptb.port_set_output_register.set(0b11u32 << 18);
 
     loop{
-        ptb.port_set_output_register.set(1 << 18);
-        delay(10_000_000);
-        ptb.port_clear_output_register.set(1 << 18);
-        delay(10_000_000);
+//        ptb.port_clear_output_register.set(0b0u32 << 18);
+        ptb.port_clear_output_register.set(0b01 << 18);
+        delay(5_000_000);
+        ptb.port_set_output_register.set(0b01 << 18);
+
+        ptb.port_clear_output_register.set(0b10 << 18);
+        delay(5_000_000);
+        ptb.port_set_output_register.set(0b10 << 18);
+
     }
 
 }
