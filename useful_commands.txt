@@ -1,0 +1,4 @@
+arm-none-eabi-objdump -d ./target/thumbv6m-none-eabi/release/cortex-m-quickstart > dump.txt
+xargo build --target thumbv6m-none-eabi --release
+arm-none-eabi-gdb target/thumbv6m-none-eabi/release/cortex-m-quickstart -tui
+openocd -f board/frdm-kl25z.cfg
