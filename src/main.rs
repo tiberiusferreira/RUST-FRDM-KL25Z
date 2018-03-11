@@ -17,8 +17,8 @@ use core::fmt::Write;
 use cortex_m::asm;
 use cortex_m_semihosting::hio;
 
-
-const BASE_PTA :u32 = 0x400FF000;
+// Accessing GPIOs through the cross bar/AIPS interface
+const BASE_PTA :u32 = 0x400F_F000;
 
 pub fn delay(mut cycles: u32)
 {
@@ -26,22 +26,34 @@ pub fn delay(mut cycles: u32)
         unsafe {
             asm!("nop" :::: "volatile");
         }
-        cycles -= 1;
+        cycles = cycles - 1;
     }
 }
 #[repr(C)]
 pub struct Gpio {
-    pub pdor : VolatileRW<u32>,
-    pub psor : VolatileRW<u32>,
-    pub pcor : VolatileRW<u32>,
-    pub ptor : VolatileRW<u32>,
-    pub pdir : VolatileRW<u32>,
-    pub pddr : VolatileRW<u32>,
+    // Actual value of the GPIO
+    pub port_data_output_register: VolatileRW<u32>,
+
+    // Whether to set it or not
+    pub port_set_output_register: VolatileRW<u32>,
+
+    // Whether to clear it or not
+    pub port_clear_output_register: VolatileRW<u32>,
+
+    // Whether to invert it or not
+    pub port_toggle_output_register: VolatileRW<u32>,
+
+    // Value of the GPIO when
+    pub port_data_input_register: VolatileRW<u32>,
+
+    // Direction of the GPIO: 0 = input // 1 = output
+    pub port_data_direction_register: VolatileRW<u32>,
 }
 
 impl Gpio {
     pub fn get(port : u32) -> &'static Gpio {
         unsafe {
+            // From 0-A 1-B 2-C 3-D 4-E each one takes 0x40 and they are mapped in sequence
             &*((BASE_PTA + (port*0x40)) as *const Gpio)
         }
     }
@@ -142,70 +154,44 @@ impl MultiPurposeClockGenerator {
 const BASE_SYSTEM_OSCILLATOR: u32 = 0x4006_5000;
 
 #[repr(C)]
-pub struct Osc0 {
+pub struct Oscillator {
     pub cr : VolatileRW<u8>,
 }
 
-impl Osc0 {
-    pub fn get() -> &'static Osc0 {
+impl Oscillator {
+    pub fn get() -> &'static Oscillator {
         unsafe {
-            &*(BASE_SYSTEM_OSCILLATOR as *const Osc0)
+            &*(BASE_SYSTEM_OSCILLATOR as *const Oscillator)
         }
     }
 }
 
 
-pub fn system_init()
-{
-    let sim = SystemIntegrationModule::get();
-    sim.system_clock_gating_control_register_5.bitwise_inc_or(0x0200);
-    sim.system_clock_divider_register_1.set(0x10010000);
-    let port_a = Port::get(0);
-    port_a.pin_control_register[18].bitwise_and(!0x01000700u32);
-    port_a.pin_control_register[19].bitwise_and(!0x01000700u32);
-    let osc0 = Osc0::get();
-    osc0.cr.set(0x89);
-    let mcg = MultiPurposeClockGenerator::get();
-    mcg.control_register_2.set(0x24);
-    mcg.control_register_1.set(0x9A);
-    mcg.control_register_4.bitwise_and_u8(!0xE0);
-    mcg.control_register_5.set(0x1);
-    mcg.control_register_6.set(0x0);
-    while (mcg.status_register.get() & 0x10) != 0x0 {};
-    while (mcg.status_register.get() & 0x0C) != 0x08 {};
-    mcg.control_register_6.set(0x40);
-    while (mcg.status_register.get() & 0x0C) != 0x08 {};
-    while (mcg.status_register.get() & 0x40) == 0x00 {};
-    mcg.control_register_1.set(0x1A);
-    while (mcg.status_register.get() & 0x0C) != 0x0C {};
-}
-
 fn main() {
+    let sim = SystemIntegrationModule::get();
+    // Disable Watchdog
+    sim.cop_control_register.set(00 << 2);
 
-    system_init();
     let mut stdout = hio::hstdout().unwrap();
-    writeln!(stdout, "Hello, world! F").unwrap();
+
     writeln!(stdout, "Hello, world! F2").unwrap();
 
     let sim = SystemIntegrationModule::get();
     sim.system_clock_gating_control_register_5.bitwise_inc_or(0x400);
-    let portb = Port::get(1);
-    portb.pin_control_register[18].set(1 << 8);
+    let port_b = Port::get(1);
+    // set control register to GPIO
+    port_b.pin_control_register[18].set(1 << 8);
 
     let ptb = Gpio::get(1);
-    ptb.pddr.set(1 << 18);
+    ptb.port_data_direction_register.set(1 << 18);
 
-    ptb.psor.set(1 << 18);
-
-    loop {
-        delay(500000);
-        // port toggle output register
-        ptb.ptor.set(1 << 18);
+    loop{
+        ptb.port_set_output_register.set(1 << 18);
+        delay(10_000_000);
+        ptb.port_clear_output_register.set(1 << 18);
+        delay(10_000_000);
     }
-//    let mut a =2;
-//    loop {
-//        a = 3;
-//    }
+
 }
 
 // As we are not using interrupts, we just register a dummy catch all handler

@@ -18,4 +18,6 @@ monitor arm semihosting enable
 # monitor itm port 0 on
 
 load
-step
+#break cortex_m_quickstart:217
+continue
+focus cmd
