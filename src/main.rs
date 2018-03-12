@@ -60,48 +60,22 @@ fn main() {
     let frdmkl25z = FrdmKl25zBoard::init();
     frdmkl25z.disable_watchdog_timer();
 
-//    let mut stdout = hio::hstdout().unwrap();
-//
-//    writeln!(stdout, "Hello, world!").unwrap();
-
-    // Enabling clock on PORT B
-//    sim.system_clock_gating_control_register_5.bitwise_inc_or(0x400);
-
     let port_b = SystemIntegrationModule::enable_port_for_use(Ports::PortB);
+    let port_d = SystemIntegrationModule::enable_port_for_use(Ports::PortD);
     let port_b_gpio_18 = port_b.set_pin_as_gpio(Pin::Pin18);
     let port_b_gpio_19 = port_b.set_pin_as_gpio(Pin::Pin19);
-
-
-//    let port_b = Port::get(Ports::PortB);
-//
-//     Set RED LED control register to GPIO
-//    port_b.pin_control_register[18].set(1 << 8);
-//     Set GREEN LED control register to GPIO
-//    port_b.pin_control_register[19].set(1 << 8);
-//
-//    let ptb = PortGpios::get(1);
-//    ptb.port_data_direction_register.set(0b11 << 18);
-//    ptb.port_set_output_register.set(0b11u32 << 18);
-//
+    let port_d_gpio_01 = port_d.set_pin_as_gpio(Pin::Pin1);
+    
     loop{
-
-        delay(5_000_000);
         port_b_gpio_18.set_value(Value::Low);
         delay(5_000_000);
         port_b_gpio_18.set_value(Value::High);
-        delay(5_000_000);
         port_b_gpio_19.set_value(Value::Low);
         delay(5_000_000);
         port_b_gpio_19.set_value(Value::High);
-//        ptb.port_clear_output_register.set(0b0u32 << 18);
-//        ptb.port_clear_output_register.set(0b01 << 18);
-
-//        ptb.port_set_output_register.set(0b01 << 18);
-//
-//        ptb.port_clear_output_register.set(0b10 << 18);
-//        delay(5_000_000);
-//        ptb.port_set_output_register.set(0b10 << 18);
-
+        port_d_gpio_01.set_value(Value::Low);
+        delay(5_000_000);
+        port_d_gpio_01.set_value(Value::High);
     }
 
 }
