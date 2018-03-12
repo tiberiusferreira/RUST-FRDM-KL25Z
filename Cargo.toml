@@ -1,12 +1,12 @@
 [package]
-authors = ["Jorge Aparicio <jorge@japaric.io>"]
+authors = ["Tiberio Ferreira <tiberiusferreira@gmail.com>"]
 categories = ["embedded", "no-std"]
-description = "A template for building applications for ARM Cortex-M microcontrollers"
-keywords = ["arm", "cortex-m", "template"]
+description = "Support crate for the FRDM-KL25Z"
+keywords = ["arm", "cortex-m", "FRDM-KL25Z", "KL25Z"]
 license = "MIT OR Apache-2.0"
-name = "cortex-m-quickstart"
-repository = "https://github.com/japaric/cortex-m-quickstart"
-version = "0.2.5"
+name = "frdm_kl25_z"
+repository = "https://github.com/tiberiusferreira/RUST-FRDM-KL25Z"
+version = "0.0.1"
 
 [dependencies]
 cortex-m = "0.4.0"
