@@ -1,4 +1,5 @@
 use io::VolatileRW;
+use port::*;
 const BASE_SIM : u32 = 0x4004_7000;
 
 // System integration Module
@@ -34,14 +35,22 @@ pub struct SystemIntegrationModule {
 }
 
 impl SystemIntegrationModule {
-    pub fn get() -> &'static SystemIntegrationModule {
+    fn get() -> &'static SystemIntegrationModule {
         unsafe {
             &*(BASE_SIM as *const SystemIntegrationModule)
         }
     }
+    pub fn disable_watchdog_timer(){
+        SystemIntegrationModule::get().cop_control_register.set(00 << 2);
 
-    pub fn enable_port_for_use(&self, ){
-        // Enabling clock on PORT B
-        self.system_clock_gating_control_register_5.bitwise_inc_or(0x400);
+    }
+    pub fn enable_port_for_use(port: Ports) -> PortWrapper{
+        // Enabling clock on Port
+        // For port A set bit 9 (starting from 0) to 1
+        // for B set bit 10, for C set bit 11 and so on
+        SystemIntegrationModule::get()
+            .system_clock_gating_control_register_5
+            .bitwise_inc_or(1 << (9 + (port.clone() as u8)));
+        PortWrapper::new(port)
     }
 }

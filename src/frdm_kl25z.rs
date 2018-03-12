@@ -15,8 +15,8 @@ impl FrdmKl25z for FrdmKl25zBoard{
         FrdmKl25zBoard{}
     }
     fn disable_watchdog_timer(&self){
-        let sim = SystemIntegrationModule::get();
+//        let sim = SystemIntegrationModule::get();
         // Disable Watchdog
-        sim.cop_control_register.set(00 << 2);
+        SystemIntegrationModule::disable_watchdog_timer();
     }
 }
