@@ -65,17 +65,31 @@ fn main() {
     let port_b_gpio_18 = port_b.set_pin_as_gpio(Pin::Pin18);
     let port_b_gpio_19 = port_b.set_pin_as_gpio(Pin::Pin19);
     let port_d_gpio_01 = port_d.set_pin_as_gpio(Pin::Pin1);
-    
+    let port_d_gpio_00 = port_d.set_pin_as_gpio(Pin::Pin0);
+
+    // LEDs
+    // RED
+    port_b_gpio_18.set_value(Value::Low);
+    delay(5_000_000);
+    port_b_gpio_18.set_value(Value::High);
+
+    // GREEN
+    port_b_gpio_19.set_value(Value::Low);
+    delay(5_000_000);
+    port_b_gpio_19.set_value(Value::High);
+
+    // BLUE
+    port_d_gpio_01.set_value(Value::Low);
+    delay(5_000_000);
+    port_d_gpio_01.set_value(Value::High);
+    delay(5_000_000);
+
     loop{
-        port_b_gpio_18.set_value(Value::Low);
-        delay(5_000_000);
-        port_b_gpio_18.set_value(Value::High);
-        port_b_gpio_19.set_value(Value::Low);
-        delay(5_000_000);
-        port_b_gpio_19.set_value(Value::High);
-        port_d_gpio_01.set_value(Value::Low);
-        delay(5_000_000);
-        port_d_gpio_01.set_value(Value::High);
+
+        port_d_gpio_00.set_value(Value::Low);
+        delay(9_000);
+        port_d_gpio_00.set_value(Value::High);
+        delay(1_000);
     }
 
 }
