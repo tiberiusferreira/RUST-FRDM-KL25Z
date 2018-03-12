@@ -1,5 +1,7 @@
 # `FRDM-KL25Z using RUST`
 
+This project aims to follow Rust's naming conventions: https://doc.rust-lang.org/1.0.0/style/style/naming/README.html
+
 ## Progress so far:
 
 ### Install toolchain (Mac instructions):
