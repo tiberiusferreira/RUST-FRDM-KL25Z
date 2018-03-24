@@ -1,0 +1,8 @@
+[dependencies.core]
+stage = 0
+
+[dependencies.alloc] # NEW
+stage = 0
+
+[dependencies.compiler_builtins]
+stage = 1

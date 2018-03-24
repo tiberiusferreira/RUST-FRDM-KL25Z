@@ -1,5 +1,5 @@
 use io::VolatileRW;
-use port::*;
+use super::port::*;
 // Accessing GPIOs through the cross bar/AIPS interface
 const BASE_PTA :u32 = 0x400F_F000;
 
@@ -8,6 +8,7 @@ pub enum Direction {
     Out
 }
 
+#[derive(Clone, PartialEq, Eq)]
 pub enum Value{
     High,
     Low
@@ -22,13 +23,13 @@ fn get_bit_at(input: u32, n: u8) -> bool {
 
 
 pub struct Gpio{
-    port: Ports,
+    port: PortLetter,
     pin: Pin,
     port_gpios: &'static PortGpios
 }
 
 impl Gpio{
-    pub fn new(port: Ports, pin: Pin) -> Gpio{
+    pub fn new(port: PortLetter, pin: Pin) -> Gpio{
         Gpio{
             port: port.clone(),
             pin,
@@ -110,7 +111,7 @@ pub struct PortGpios {
 }
 
 impl PortGpios {
-    pub fn get(port : Ports) -> &'static PortGpios {
+    pub fn get(port : PortLetter) -> &'static PortGpios {
         unsafe {
             // From 0-A 1-B 2-C 3-D 4-E each one takes 0x40 and they are mapped in sequence
             &*((BASE_PTA + ((port as u32)*0x40)) as *const PortGpios)

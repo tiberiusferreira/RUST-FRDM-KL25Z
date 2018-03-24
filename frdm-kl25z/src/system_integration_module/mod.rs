@@ -1,7 +1,14 @@
 use io::VolatileRW;
-use port::*;
+mod port;
+mod gpio;
+pub use self::port::PortLetter;
+pub use self::port::PortWrapper;
+pub use self::gpio::Gpio;
+pub use self::port::Pin;
+pub use self::gpio::Direction;
+pub use self::gpio::Value;
+use self::port::PortRegisters;
 const BASE_SIM : u32 = 0x4004_7000;
-
 // System integration Module
 #[repr(C)]
 pub struct SystemIntegrationModule {
@@ -44,7 +51,7 @@ impl SystemIntegrationModule {
         SystemIntegrationModule::get().cop_control_register.set(00 << 2);
 
     }
-    pub fn enable_port_for_use(port: Ports) -> PortWrapper{
+    pub fn enable_port_for_use(port: PortLetter) -> PortWrapper{
         // Enabling clock on Port
         // For port A set bit 9 (starting from 0) to 1
         // for B set bit 10, for C set bit 11 and so on

@@ -2,3 +2,7 @@
 .gdb_history
 Cargo.lock
 target/
+**/.idea
+**/*.iml
+**/*.pdf
+**/.DS_Store

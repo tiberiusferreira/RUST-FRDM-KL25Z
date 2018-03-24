@@ -1,7 +1,8 @@
 use io::VolatileRW;
-use gpio::*;
+use super::gpio::*;
+
 #[derive(Clone)]
-pub enum Ports{
+pub enum PortLetter {
     PortA = 0,
     PortB = 1,
     PortC = 2,
@@ -46,24 +47,24 @@ pub enum Pin{
 const BASE_PORT_A: u32 = 0x4004_9000;
 
 pub struct PortWrapper{
-    raw_port_mem: &'static Port,
-    port_number: Ports
+    raw_port_mem: &'static PortRegisters,
+    port_letter: PortLetter
 }
 
 impl PortWrapper{
-    pub fn new(port: Ports) -> PortWrapper{
+    pub (in super) fn new(port: PortLetter) -> PortWrapper{
         PortWrapper{
-            raw_port_mem: Port::get(port.clone()),
-            port_number: port
+            raw_port_mem: PortRegisters::get(port.clone()),
+            port_letter: port
         }
     }
     pub fn set_pin_as_gpio(&self, pin: Pin) -> Gpio {
-        self.raw_port_mem.pin_control_register[pin.clone() as usize].set(1 << 8);
-        Gpio::new(self.port_number.clone(), pin)
+        self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_inc_or(1 << 8);
+        Gpio::new(self.port_letter.clone(), pin)
     }
 }
 #[repr(C)]
-pub struct Port {
+pub struct PortRegisters {
     pub pin_control_register: [VolatileRW<u32>; 32],
     pub global_pin_low_register: VolatileRW<u32>,
     pub global_pin_high_register: VolatileRW<u32>,
@@ -72,10 +73,10 @@ pub struct Port {
 }
 
 // Ports A B C D E map to memory regions which are 0x1000 of distance from each other
-impl Port {
-    pub fn get(port: Ports) -> &'static Port {
+impl PortRegisters {
+    pub fn get(port: PortLetter) -> &'static PortRegisters {
         unsafe {
-            &*((BASE_PORT_A + ((port as u32)*0x1000)) as *const Port)
+            &*((BASE_PORT_A + ((port as u32)*0x1000)) as *const PortRegisters)
         }
     }
 
