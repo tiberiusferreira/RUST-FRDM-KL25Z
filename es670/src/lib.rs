@@ -99,33 +99,15 @@ impl Es670{
             }
         }
 
-        gpio.set_direction(Direction::Out);
-        gpio.set_value(Value::High);
-
         //
         let seg_a = port.set_pin_as_gpio(Pin::Pin0);
-        seg_a.set_direction(Direction::Out);
-
         let seg_b = port.set_pin_as_gpio(Pin::Pin1);
-        seg_b.set_direction(Direction::Out);
-
         let seg_c = port.set_pin_as_gpio(Pin::Pin2);
-        seg_c.set_direction(Direction::Out);
-
         let seg_d = port.set_pin_as_gpio(Pin::Pin3);
-        seg_d.set_direction(Direction::Out);
-
         let seg_e = port.set_pin_as_gpio(Pin::Pin4);
-        seg_e.set_direction(Direction::Out);
-
         let seg_f = port.set_pin_as_gpio(Pin::Pin5);
-        seg_f.set_direction(Direction::Out);
-
         let seg_g = port.set_pin_as_gpio(Pin::Pin6);
-        seg_g.set_direction(Direction::Out);
-
         let seg_dp = port.set_pin_as_gpio(Pin::Pin7);
-        seg_dp.set_direction(Direction::Out);
         seg_dp.set_value(Low);
         //
         match input_char {
@@ -239,6 +221,8 @@ impl Es670{
             }
             _ => {}
         }
+        gpio.set_direction(Direction::Out);
+        gpio.set_value(Value::High);
 
     }
 
@@ -277,30 +261,3 @@ impl Es670{
     }
 
 }
-
-//
-//    let port_b = SystemIntegrationModule::enable_port_for_use(Ports::PortB);
-//    let port_d = SystemIntegrationModule::enable_port_for_use(Ports::PortD);
-//    let port_b_gpio_18 = port_b.set_pin_as_gpio(Pin::Pin18);
-//    let port_b_gpio_19 = port_b.set_pin_as_gpio(Pin::Pin19);
-//    let port_d_gpio_01 = port_d.set_pin_as_gpio(Pin::Pin1);
-//    let port_d_gpio_00 = port_d.set_pin_as_gpio(Pin::Pin0);
-//
-//    // LEDs
-//        port.set_pin_as_gpio()
-
-//    // RED
-//    port_b_gpio_18.set_value(Value::Low);
-//    delay(5_000_000);
-//    port_b_gpio_18.set_value(Value::High);
-//
-//    // GREEN
-//    port_b_gpio_19.set_value(Value::Low);
-//    delay(5_000_000);
-//    port_b_gpio_19.set_value(Value::High);
-//
-//    // BLUE
-//    port_d_gpio_01.set_value(Value::Low);
-//    delay(5_000_000);
-//    port_d_gpio_01.set_value(Value::High);
-//    delay(5_000_000);

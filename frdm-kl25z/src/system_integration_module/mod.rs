@@ -14,7 +14,7 @@ const BASE_SIM : u32 = 0x4004_7000;
 pub struct SystemIntegrationModule {
     pub system_option_register_1: VolatileRW<u32>,
     pub system_config_register: VolatileRW<u32>,
-    pub reserved_0 : [u8; 4092],
+        pub reserved_0 : [u8; 4092],
     pub system_option_register_2: VolatileRW<u32>,
     pub reserved_1 : [u8; 4],
     pub system_option_register_4: VolatileRW<u32>,

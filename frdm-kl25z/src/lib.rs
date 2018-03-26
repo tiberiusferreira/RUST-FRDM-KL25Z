@@ -32,34 +32,16 @@ pub trait FrdmKl25z{
     fn new() -> FrdmKl25zBoard;
     fn disable_watchdog_timer(&self);
     fn get_port(&self, port: PortLetter) -> PortWrapper;
-    fn delay(&self, number_of_instructions: u32);
     fn delay_ms(&self, millis: u32);
-    fn delay_1ms(&self);
 }
 
-impl FrdmKl25z for FrdmKl25zBoard{
-    fn new() -> FrdmKl25zBoard{
-        FrdmKl25zBoard{}
-    }
-    fn disable_watchdog_timer(&self){
-        SystemIntegrationModule::disable_watchdog_timer();
-    }
-    fn get_port(&self, port: PortLetter) -> PortWrapper{
-        SystemIntegrationModule::enable_port_for_use(port)
-    }
+impl FrdmKl25zBoard {
     fn delay(&self, mut cycles: u32){
         while cycles > 0 {
             unsafe {
                 asm!("nop" :::: "volatile");
             }
             cycles = cycles - 1;
-        }
-    }
-
-    fn delay_ms(&self, mut millis: u32) {
-        while millis > 0 {
-            self.delay_1ms();
-            millis = millis - 1;
         }
     }
     fn delay_1ms(&self){
@@ -77,6 +59,26 @@ impl FrdmKl25z for FrdmKl25zBoard{
             cycles = cycles - 1;
         }
     }
+}
+impl FrdmKl25z for FrdmKl25zBoard{
+    fn new() -> FrdmKl25zBoard{
+        FrdmKl25zBoard{}
+    }
+    fn disable_watchdog_timer(&self){
+        SystemIntegrationModule::disable_watchdog_timer();
+    }
+    fn get_port(&self, port: PortLetter) -> PortWrapper{
+        SystemIntegrationModule::enable_port_for_use(port)
+    }
+
+
+    fn delay_ms(&self, mut millis: u32) {
+        while millis > 0 {
+            self.delay_1ms();
+            millis = millis - 1;
+        }
+    }
+
 }
 
 #[link_section = ".vector_table.interrupts"]
