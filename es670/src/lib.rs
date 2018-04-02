@@ -176,6 +176,51 @@ impl Es670{
                 seg_f.set_value(High);
                 seg_g.set_value(High);
             },
+            'b' | 'B' =>{
+                seg_a.set_value(Low);
+                seg_b.set_value(Low);
+                seg_c.set_value(High);
+                seg_d.set_value(High);
+                seg_e.set_value(High);
+                seg_f.set_value(High);
+                seg_g.set_value(High);
+            },
+            'c' | 'C' =>{
+                seg_a.set_value(High);
+                seg_b.set_value(Low);
+                seg_c.set_value(Low);
+                seg_d.set_value(High);
+                seg_e.set_value(High);
+                seg_f.set_value(High);
+                seg_g.set_value(Low);
+            },
+            'd' | 'D' =>{
+                seg_a.set_value(Low);
+                seg_b.set_value(High);
+                seg_c.set_value(High);
+                seg_d.set_value(High);
+                seg_e.set_value(High);
+                seg_f.set_value(Low);
+                seg_g.set_value(High);
+            },
+            'e' | 'E' =>{
+                seg_a.set_value(High);
+                seg_b.set_value(Low);
+                seg_c.set_value(Low);
+                seg_d.set_value(High);
+                seg_e.set_value(High);
+                seg_f.set_value(High);
+                seg_g.set_value(High);
+            },
+            'f' | 'F' =>{
+                seg_a.set_value(High);
+                seg_b.set_value(Low);
+                seg_c.set_value(Low);
+                seg_d.set_value(Low);
+                seg_e.set_value(High);
+                seg_f.set_value(High);
+                seg_g.set_value(High);
+            },
             '0' => {
                 seg_a.set_value(High);
                 seg_b.set_value(High);

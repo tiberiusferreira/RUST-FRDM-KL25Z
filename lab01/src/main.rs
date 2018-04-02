@@ -42,10 +42,10 @@ fn main() {
         }
     }
     let board = es670::Es670::new();
-    let mut number_times_switch_0_pressed = 1;
-    let mut number_times_switch_1_pressed = 2;
-    let mut number_times_switch_2_pressed = 3;
-    let mut number_times_switch_3_pressed = 4;
+    let mut number_times_switch_0_pressed = 4;
+    let mut number_times_switch_1_pressed = 3;
+    let mut number_times_switch_2_pressed = 2;
+    let mut number_times_switch_3_pressed = 1;
     let mut switch_was_pressed_0 = false;
     let mut switch_was_pressed_1 = false;
     let mut switch_was_pressed_2 = false;
@@ -60,7 +60,7 @@ fn main() {
     let _gpio = board.get_gpio(PortLetter::PortA, Pin::Pin4);
 
     loop {
-        board.display_show(Display::DS1, int_to_char(number_times_switch_0_pressed));
+        board.display_show(Display::DS1, 'f');
         board.delay(1);
         board.display_show(Display::DS2, int_to_char(number_times_switch_1_pressed));
         board.delay(1);

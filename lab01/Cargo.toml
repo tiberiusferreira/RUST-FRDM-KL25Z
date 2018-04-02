@@ -32,5 +32,5 @@ incremental = false
 [profile.release]
 codegen-units = 1
 incremental = false
-debug = false
+debug = true
 lto = false
