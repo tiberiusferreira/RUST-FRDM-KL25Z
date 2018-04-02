@@ -6,6 +6,17 @@ MEMORY
   RAM (rwx) : ORIGIN = 0x1FFFF0C0, LENGTH = 16K - 0xC0
 }
 
+SECTIONS
+{
+    .flash_protect :
+    {
+        KEEP(*(.flash_configuration))
+         . = ALIGN(4);
+    } > FLASH_PROTECTION
+
+}
+
+
 /* This is where the call stack will be allocated. */
 /* The stack is of the full descending type. */
 /* You may want to use this variable to locate the call stack and static
@@ -17,7 +28,7 @@ MEMORY
    section */
 /* This is required only on microcontrollers that store some configuration right
    after the vector table */
-/* _stext = ORIGIN(FLASH) + 0x400; */
+_stext = ORIGIN(FLASH) + 0x400 ;
 
 /* Size of the heap (in bytes) */
 /* _heap_size = 1024; */

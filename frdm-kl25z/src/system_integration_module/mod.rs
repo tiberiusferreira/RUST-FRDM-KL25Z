@@ -7,14 +7,14 @@ pub use self::gpio::Gpio;
 pub use self::port::Pin;
 pub use self::gpio::Direction;
 pub use self::gpio::Value;
-use self::port::PortRegisters;
+
 const BASE_SIM : u32 = 0x4004_7000;
 // System integration Module
 #[repr(C)]
 pub struct SystemIntegrationModule {
     pub system_option_register_1: VolatileRW<u32>,
     pub system_config_register: VolatileRW<u32>,
-        pub reserved_0 : [u8; 4092],
+    pub reserved_0 : [u8; 4092],
     pub system_option_register_2: VolatileRW<u32>,
     pub reserved_1 : [u8; 4],
     pub system_option_register_4: VolatileRW<u32>,

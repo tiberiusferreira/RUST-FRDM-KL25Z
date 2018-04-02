@@ -9,7 +9,8 @@ mod switch;
 pub use switch::*;
 pub use led::*;
 pub use display::*;
-use frdm_kl25z::*;
+pub use frdm_kl25z::*;
+
 pub use frdm_kl25z::Value::{High, Low};
 pub struct Es670{
     frdm_kl25z:  frdm_kl25z::FrdmKl25zBoard
@@ -24,6 +25,13 @@ impl Es670{
         es670.frdm_kl25z.disable_watchdog_timer();
         es670
     }
+
+    pub fn get_gpio(&self, port: PortLetter, pin: Pin) -> Gpio{
+        let port = self.frdm_kl25z.get_port(port);
+        let gpio = port.set_pin_as_gpio(pin);
+        return gpio
+    }
+
 
     pub fn delay(&self, ms: u32){
         self.frdm_kl25z.delay_ms(ms);
@@ -48,6 +56,30 @@ impl Es670{
                 let gpio_19 = port.set_pin_as_gpio(Pin::Pin19);
                 gpio_19.set_direction(Direction::Out);
                 gpio_19.set_value(Value::Low);
+            },
+            Led::L1 => {
+                let port = self.frdm_kl25z.get_port(frdm_kl25z::PortLetter::PortA);
+                let gpio = port.set_pin_as_gpio(Pin::Pin1);
+                gpio.set_direction(Direction::Out);
+                gpio.set_value(Value::High);
+            },
+            Led::L2 => {
+                let port = self.frdm_kl25z.get_port(frdm_kl25z::PortLetter::PortA);
+                let gpio = port.set_pin_as_gpio(Pin::Pin2);
+                gpio.set_direction(Direction::Out);
+                gpio.set_value(Value::High);
+            },
+            Led::L3 => {
+                let port = self.frdm_kl25z.get_port(frdm_kl25z::PortLetter::PortA);
+                let gpio = port.set_pin_as_gpio(Pin::Pin4);
+                gpio.set_direction(Direction::Out);
+                gpio.set_value(Value::High);
+            },
+            Led::L4 => {
+                let port = self.frdm_kl25z.get_port(frdm_kl25z::PortLetter::PortA);
+                let gpio = port.set_pin_as_gpio(Pin::Pin5);
+                gpio.set_direction(Direction::Out);
+                gpio.set_value(Value::High);
             }
         }
     }
@@ -71,6 +103,30 @@ impl Es670{
                 let gpio_19 = port.set_pin_as_gpio(Pin::Pin19);
                 gpio_19.set_direction(Direction::Out);
                 gpio_19.set_value(Value::High);
+            },
+            Led::L1 => {
+                let port = self.frdm_kl25z.get_port(frdm_kl25z::PortLetter::PortA);
+                let gpio = port.set_pin_as_gpio(Pin::Pin1);
+                gpio.set_direction(Direction::Out);
+                gpio.set_value(Value::Low);
+            },
+            Led::L2 => {
+                let port = self.frdm_kl25z.get_port(frdm_kl25z::PortLetter::PortA);
+                let gpio = port.set_pin_as_gpio(Pin::Pin2);
+                gpio.set_direction(Direction::Out);
+                gpio.set_value(Value::Low);
+            },
+            Led::L3 => {
+                let port = self.frdm_kl25z.get_port(frdm_kl25z::PortLetter::PortA);
+                let gpio = port.set_pin_as_gpio(Pin::Pin4);
+                gpio.set_direction(Direction::Out);
+                gpio.set_value(Value::Low);
+            },
+            Led::L4 => {
+                let port = self.frdm_kl25z.get_port(frdm_kl25z::PortLetter::PortA);
+                let gpio = port.set_pin_as_gpio(Pin::Pin5);
+                gpio.set_direction(Direction::Out);
+                gpio.set_value(Value::Low);
             }
         }
     }

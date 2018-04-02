@@ -8,7 +8,7 @@ pub enum Direction {
     Out
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub enum Value{
     High,
     Low
@@ -35,6 +35,10 @@ impl Gpio{
             pin,
             port_gpios: PortGpios::get(port)
         }
+    }
+
+    pub fn get_port(&self) -> &PortLetter{
+        &self.port
     }
     fn get_pin_bit(&self, all_pins_data: u32) -> bool{
         get_bit_at(all_pins_data, self.pin.clone() as u8)
@@ -70,10 +74,10 @@ impl Gpio{
         self.set_direction(Direction::Out);
         match value {
             Value::High => {
-                (self.port_gpios.port_set_output_register.bitwise_inc_or( (1 << (self.pin.clone() as u32))));
+                (self.port_gpios.port_set_output_register.bitwise_inc_or( 1 << (self.pin.clone() as u32)));
             },
             Value::Low => {
-                (self.port_gpios.port_clear_output_register.bitwise_inc_or( (1 << (self.pin.clone() as u32))));
+                (self.port_gpios.port_clear_output_register.bitwise_inc_or( 1 << (self.pin.clone() as u32)));
             }
         }
     }
@@ -83,7 +87,7 @@ impl Gpio{
                 (self.port_gpios.port_data_direction_register.bitwise_and( !(1 << (self.pin.clone() as u32))));
             },
             Direction::Out => {
-                (self.port_gpios.port_data_direction_register.bitwise_inc_or( (1 << (self.pin.clone() as u32))));
+                (self.port_gpios.port_data_direction_register.bitwise_inc_or( 1 << (self.pin.clone() as u32)));
             }
         }
     }

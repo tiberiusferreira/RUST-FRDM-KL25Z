@@ -32,6 +32,7 @@ codegen-units = 1
 incremental = false
 
 [profile.release]
-debug = true
+codegen-units = 1
+incremental = false
+debug = false
 lto = true
-
