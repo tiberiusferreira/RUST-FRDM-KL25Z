@@ -1,20 +1,21 @@
 MEMORY
 {
-  VECTORS (rx) : ORIGIN = 0x00000000, LENGTH = 0x00000400
-  FLASH_PROTECTION	(rx) : ORIGIN = 0x00000400, LENGTH = 0x00000010
-  FLASH (rx) : ORIGIN = 0x00000410, LENGTH = 128K - 0x00000410
-  RAM (rwx) : ORIGIN = 0x1FFFF0C0, LENGTH = 16K - 0xC0
+    FLASH : ORIGIN = 0x00000000, LENGTH = 128K
+    RAM   : ORIGIN = 0x1FFFF0C0, LENGTH = 16K - 0xC0
 }
 
 SECTIONS
 {
-    .flash_protect :
+    .flash_protect 0x400 :
     {
-        KEEP(*(.flash_configuration))
-         . = ALIGN(4);
-    } > FLASH_PROTECTION
-
+        LONG(0xFFFFFFFF);
+        LONG(0xFFFFFFFF);
+        LONG(0xFFFFFFFF);
+        LONG(0xFFFFFFFE);
+    } > FLASH
 }
+
+_stext = 0x410;
 
 
 /* This is where the call stack will be allocated. */
@@ -28,7 +29,7 @@ SECTIONS
    section */
 /* This is required only on microcontrollers that store some configuration right
    after the vector table */
-_stext = ORIGIN(FLASH) + 0x400 ;
+/* _stext = ORIGIN(FLASH) + 0x400 ; */
 
 /* Size of the heap (in bytes) */
 /* _heap_size = 1024; */
