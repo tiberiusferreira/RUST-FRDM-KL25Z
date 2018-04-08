@@ -40,7 +40,7 @@ fn main() {
 
         es670::Uart_0::enable_uart(9600);
     loop {
-        es670::Uart_0::send_char(0b1100_0001);
+        es670::Uart_0::send_char('t');
 //        es670::Uart_0::send_char(0b0000_1000);
 //        es670::Uart_0::send_char(0b1000_0000);
 //        board.turn_on_led(Led::GREEN);

@@ -26,11 +26,11 @@ impl Uart_0 {
         }
     }
 
-    pub fn send_char(bytes: u8){
+    pub fn send_char(bytes: char){
         while (Uart_0::get().status_register_1.get() & 0b1000_0000)==0b0000_0000{
 
         }
-        Uart_0::get().data_register.set(bytes);
+        Uart_0::get().data_register.set(bytes as u8);
         while (Uart_0::get().status_register_1.get() & 0b1000_0000)==0b0000_0000{
 
         }
@@ -75,9 +75,10 @@ impl Uart_0 {
 //        Uart_0::get().control_register_4.bitwise_and_u8(!(0b1 << 4));
 //        Uart_0::get().status_register_2.bitwise_inc_or_u8(0b1111);
         let over_sample = 16;
-        const CORE_CLOCK :i32= 48_000_000;
+        const CORE_CLOCK :i32= 20_970_000;
         let divisor: u16 = ((CORE_CLOCK / (over_sample)) / baud_rate) as u16;
-
+//      (48000000/16)/19200 = 156,25
+//      156 = 1001_1100
 
         Uart_0::get().control_register_4.set_bit(0);
         Uart_0::get().control_register_4.set_bit(1);
@@ -90,9 +91,10 @@ impl Uart_0 {
 //        let sbr = ((sysclk) / (baud * osr as u32)) as u16;
 //        let tmp = Uart_0::get().baud_rate_register_high.get() & (!0b11111);
 
-//        Uart_0::get().baud_rate_register_high.set(((divisor>>8) & 0x1F) as u8);
-        Uart_0::get().baud_rate_register_high.set(0x0);
-        Uart_0::get().baud_rate_register_low.set(0x44);
+        Uart_0::get().baud_rate_register_high.set(((divisor>>8) & 0x1F) as u8);
+        Uart_0::get().baud_rate_register_low.set((divisor & 0xff) as u8);
+//        Uart_0::get().baud_rate_register_high.set(0x0);
+//        Uart_0::get().baud_rate_register_low.set(0x44);
 
         Uart_0::get().control_register_2.set_bit(2);
         Uart_0::get().control_register_2.set_bit(3);
