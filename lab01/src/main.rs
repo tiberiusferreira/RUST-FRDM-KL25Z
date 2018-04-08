@@ -7,16 +7,11 @@ extern crate cortex_m;
 extern crate cortex_m_rt;
 extern crate cortex_m_semihosting;
 use cortex_m::asm;
-use core::fmt::Write;
-
-use cortex_m_semihosting::hio;
 use es670::*;
 use es670::{High, Low};
 
 
 fn main() {
-//    let mut stdout = hio::hstdout().unwrap();
-
     fn int_to_char(mut int: i32) -> char{
         int = int%10;
         match int {
@@ -42,26 +37,18 @@ fn main() {
     let mut switch_was_pressed_1 = false;
     let mut switch_was_pressed_2 = false;
     let mut switch_was_pressed_3 = false;
-//    let state = board.get_switch_state(Switch::S3);
-//    writeln!(stdout, "Switch 3 state was: {:?}", state).unwrap();
 
-//    let state = board.get_switch_state(Switch::S4);
-//    writeln!(stdout, "Switch 4 state was: {:?}", state).unwrap();
-
-    // So it is not configured as an NMI
-//    let _gpio = board.get_gpio(PortLetter::PortA, Pin::Pin4);
-
+        es670::Uart_0::enable_uart(9600);
     loop {
-
-        board.turn_on_led(Led::BLUE);
-        board.delay(1000);
-        board.turn_off_led(Led::BLUE);
-
-        board.turn_on_led(Led::GREEN);
-        board.delay(1000);
-        board.turn_off_led(Led::GREEN);
-        board.delay(1000);
-//        board.display_show(Display::DS1, 'f');
+        es670::Uart_0::send_char(0b1100_0001);
+//        es670::Uart_0::send_char(0b0000_1000);
+//        es670::Uart_0::send_char(0b1000_0000);
+//        board.turn_on_led(Led::GREEN);
+//        board.delay(500);
+//        board.turn_off_led(Led::GREEN);
+        board.delay(500);
+//        board.delay(1000);
+//        board.display_show(Display::DS1, int_to_char(number_times_switch_0_pressed));
 //        board.delay(1);
 //        board.display_show(Display::DS2, int_to_char(number_times_switch_1_pressed));
 //        board.delay(1);
@@ -71,7 +58,7 @@ fn main() {
 //        board.delay(1);
 //
 //
-//        if board.get_switch_state(Switch::S1) == Low && !switch_was_pressed_0 {
+//        if board.get_switch_state(Switch::S1) == Low && !switch_was_pressed_0{
 //            board.turn_off_led(Led::L1);
 //            number_times_switch_0_pressed = number_times_switch_0_pressed + 1;
 //            switch_was_pressed_0 = true;

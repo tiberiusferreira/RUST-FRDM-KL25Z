@@ -59,8 +59,23 @@ impl PortWrapper{
         }
     }
     pub fn set_pin_as_gpio(&self, pin: Pin) -> Gpio {
-        self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_inc_or(1 << 8);
+        // Clear all bits
+        self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_and(!(0b111 << 8));
+        // Set bit 8 (starts at 0)
+        self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_inc_or(0b1 << 8);
         Gpio::new(self.port_letter.clone(), pin)
+    }
+    pub fn set_pin_as_alt2(&self, pin: Pin) {
+        // Clear all bits
+        self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_and(!(0b111 << 8));
+        // Set bit 8 (starts at 0)
+        self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_inc_or(0b1 << 9);
+
+        self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_inc_or(0b1 << 24);
+
+        self.raw_port_mem.pin_control_register[pin.clone() as usize].set_bit(0);
+        self.raw_port_mem.pin_control_register[pin.clone() as usize].set_bit(1);
+//        Gpio::new(self.port_letter.clone(), pin)
     }
 }
 #[repr(C)]

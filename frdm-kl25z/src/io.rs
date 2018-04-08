@@ -43,6 +43,24 @@ impl VolatileRW<u32> {
     }
 
     #[inline]
+    pub fn set_bit(&self, bit_number: u8) {
+        if bit_number > 31{
+            return;
+        }
+        let read = self.get();
+        self.set(read | (0b1 << bit_number));
+    }
+
+    #[inline]
+    pub fn clear_bit(&self, bit_number: u8) {
+        if bit_number > 31{
+            return;
+        }
+        let read = self.get();
+        self.set(read & !(0b1 << bit_number));
+    }
+
+    #[inline]
     pub fn bitwise_and(&self, value: u32) {
         let read = self.get();
         self.set(read & value);
@@ -53,6 +71,24 @@ impl VolatileRW<u8> {
     pub fn bitwise_inc_or_u8(&self, value: u8) {
         let read = self.get();
         self.set(read | value);
+    }
+
+    #[inline]
+    pub fn set_bit(&self, bit_number: u8) {
+        if bit_number > 7{
+            return;
+        }
+        let read = self.get();
+        self.set(read | (0b1 << bit_number));
+    }
+
+    #[inline]
+    pub fn clear_bit(&self, bit_number: u8) {
+        if bit_number > 7{
+            return;
+        }
+        let read = self.get();
+        self.set(read & !(0b1 << bit_number));
     }
 
     #[inline]

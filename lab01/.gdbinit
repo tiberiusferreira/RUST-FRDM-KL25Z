@@ -18,6 +18,6 @@ monitor arm semihosting enable
 # monitor itm port 0 on
 
 load
-#break lab01::main
+break lab01::99
 #continue
 focus cmd
