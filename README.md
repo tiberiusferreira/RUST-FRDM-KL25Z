@@ -2,7 +2,7 @@
 
 This project aims to follow Rust's naming conventions: https://doc.rust-lang.org/1.0.0/style/style/naming/README.html
 
-## Progress so far:
+## Getting it to run:
 
 ### Install toolchain (Mac instructions):
 
@@ -45,9 +45,19 @@ arm-none-eabi-gdb target/thumbv6m-none-eabi/release/cortex-m-quickstart -tui
 **Type continue and see the program run**
 
 
+## What works:
+
+GPIOs of PORTs
+
+Serial communication with interrupts
+
 # Based upon:
 
 # [cortex-m-quickstart](https://docs.rs/cortex-m-quickstart) and [Blinky demo for FRDM-KL25Z](https://github.com/0xc0170/frdm-kl25z-rust)
+
+Special thanks to Japaric and the Rust embedded community for helping me create a proper bin file: [Flash Config Bin Issue](https://github.com/japaric/cortex-m-quickstart/issues/25)
+
+Also my teacher, [Denis Loubach](https://github.com/dloubach) for letting me use RUST over C for this project.
 
 # License
 
