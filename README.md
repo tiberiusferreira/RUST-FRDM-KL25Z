@@ -23,17 +23,26 @@ rustup component add rust-src
 
 ### Compile and Run
 
-#### Compile using:
+#### Compile the ELF using the following inside the lab01 folder:
 
 xargo build --target thumbv6m-none-eabi --release
 
-#### Flash and Debug
+#### Generate a .bin file from the elf:
+
+arm-none-eabi-objcopy -S -O binary ./target/thumbv6m-none-eabi/release/lab01 lab01.bin
+
+#### Either Flash 
+
+Copy the bin file to the FRDM-KL25Z mounted as USB mass storage with the MBED 0243 Firmware or latter
+
+#### Or Flash and Debug
 
 openocd -f board/frdm-kl25z.cfg **will block, leave terminal open**
 
 arm-none-eabi-gdb target/thumbv6m-none-eabi/release/cortex-m-quickstart -tui 
 
-**Type continue and watch Hello, World! be written on the other (blocked) terminal and the RED LED flash**
+
+**Type continue and see the program run**
 
 
 # Based upon:
