@@ -33,7 +33,7 @@ arm-none-eabi-objcopy -S -O binary ./target/thumbv6m-none-eabi/release/lab01 lab
 
 #### Either Flash 
 
-Copy the bin file to the FRDM-KL25Z mounted as USB mass storage with the MBED 0243 Firmware or latter
+Copy the bin file to the FRDM-KL25Z mounted as USB mass storage with the MBED 0243 Firmware or later
 
 #### Or Flash and Debug
 
