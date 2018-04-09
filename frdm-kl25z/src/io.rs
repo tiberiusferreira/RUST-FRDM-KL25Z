@@ -43,6 +43,14 @@ impl VolatileRW<u32> {
     }
 
     #[inline]
+    pub fn get_bit(&self, bit_number: u32) -> bool {
+        if bit_number > 31{
+            return false;
+        }
+        return self.get() & (1 << bit_number) != 0;
+    }
+
+    #[inline]
     pub fn set_bit(&self, bit_number: u8) {
         if bit_number > 31{
             return;
@@ -71,6 +79,14 @@ impl VolatileRW<u8> {
     pub fn bitwise_inc_or_u8(&self, value: u8) {
         let read = self.get();
         self.set(read | value);
+    }
+
+    #[inline]
+    pub fn get_bit(&self, bit_number: u32) -> bool {
+        if bit_number > 7{
+            return false;
+        }
+        return self.get() & (1 << bit_number) != 0;
     }
 
     #[inline]

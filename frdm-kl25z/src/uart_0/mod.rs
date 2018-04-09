@@ -26,80 +26,71 @@ impl Uart_0 {
         }
     }
 
+    fn disable_tx_rx(){
+        Self::get().control_register_2.clear_bit(2);
+        Self::get().control_register_2.clear_bit(3);
+    }
+
+    fn enable_tx_rx(){
+        Self::get().control_register_2.set_bit(2);
+        Self::get().control_register_2.set_bit(3);
+    }
+
+    fn set_default_settings(){
+        Self::get().control_register_2.set(0b0000_0000);
+        Self::get().control_register_1.set(0b0000_0000);
+        Self::get().control_register_3.set(0b0000_0000);
+        Self::get().status_register_2.set(0b0000_0000);
+    }
+
+    fn set_uart_baud_rate_using_default_mcgfllclk_clock(baud_rate: i32){
+        let over_sample = 16;
+        let uart0 = Self::get();
+        /*
+        * MCGFLLCLK clock drives UART0
+        * The default settings give 20.97Mhz clock
+        * See section 24.5.2 "Using a 32.768 kHz reference" of the datasheet for more info
+        */
+        const MCGFLLCLK_CLOCK :i32= 20_970_000;
+        let divisor: u16 = ((MCGFLLCLK_CLOCK / (over_sample)) / baud_rate) as u16;
+
+        uart0.control_register_4.bitwise_inc_or_u8(0b0000_1111);
+        uart0.control_register_4.bitwise_and_u8(!0b0001_0000);
+
+        uart0.baud_rate_register_high.set(((divisor>>8) & 0x1F) as u8);
+        uart0.baud_rate_register_low.set((divisor & 0xff) as u8);
+    }
+
+    fn tx_buffer_empty() -> bool{
+        return Self::get().status_register_1.get_bit(7);
+    }
+
     pub fn send_char(bytes: char){
-        while (Uart_0::get().status_register_1.get() & 0b1000_0000)==0b0000_0000{
+        while !Self::tx_buffer_empty(){}
+        Self::get().data_register.set(bytes as u8);
+    }
 
-        }
-        Uart_0::get().data_register.set(bytes as u8);
-        while (Uart_0::get().status_register_1.get() & 0b1000_0000)==0b0000_0000{
+    fn rx_buffer_full() -> bool{
+        return Self::get().status_register_1.get_bit(5);
+    }
 
-        }
+    pub fn read_char() -> char{
+        while !Self::rx_buffer_full(){}
+        return Self::get().data_register.get() as char;
     }
 
     pub fn enable_uart(baud_rate: i32){
 
-        // Enable Port A clock
         let port_a = SystemIntegrationModule::enable_port_for_use(PortLetter::PortA);
-
-        // Enable UART0 Clock
-        SystemIntegrationModule::get().system_clock_gating_control_register_4.set_bit(10);
-
-        // Select source as MCGFLLCLK clock or MCGPLLCLK/2 clock
-        SystemIntegrationModule::get().system_option_register_2.set_bit(26);
-        SystemIntegrationModule::get().system_option_register_2.clear_bit(27);
-
 
         port_a.set_pin_as_alt2(Pin::Pin1);
         port_a.set_pin_as_alt2(Pin::Pin2);
-
-
-
-//        SystemIntegrationModule::get().system_option_register_2.set_bit(16);
-
-        // Disable transmiter / receiver
-        Uart_0::get().control_register_2.clear_bit(2);
-        Uart_0::get().control_register_2.clear_bit(3);
-
-
-        Uart_0::get().control_register_2.set(0b0000_0000);
-        Uart_0::get().control_register_1.set(0b0000_0000);
-        Uart_0::get().control_register_3.set(0b0000_0000);
-        Uart_0::get().status_register_2.set(0b0000_0000);
-
-
-//        Uart_0::get().match_address_register_1.set(0b0000_0000);
-
-
-//        Uart_0::get().status_register_1.bitwise_inc_or_u8(0b11111);
-//        Uart_0::get().status_register_2.bitwise_inc_or_u8(0b1100_0000);
-//        Uart_0::get().control_register_4.bitwise_and_u8(!(0b1 << 4));
-//        Uart_0::get().status_register_2.bitwise_inc_or_u8(0b1111);
-        let over_sample = 16;
-        const CORE_CLOCK :i32= 20_970_000;
-        let divisor: u16 = ((CORE_CLOCK / (over_sample)) / baud_rate) as u16;
-//      (48000000/16)/19200 = 156,25
-//      156 = 1001_1100
-
-        Uart_0::get().control_register_4.set_bit(0);
-        Uart_0::get().control_register_4.set_bit(1);
-        Uart_0::get().control_register_4.set_bit(2);
-        Uart_0::get().control_register_4.set_bit(3);
-        Uart_0::get().control_register_4.clear_bit(4);
-
-
-//        let sysclk: u32= 24_000_000;
-//        let sbr = ((sysclk) / (baud * osr as u32)) as u16;
-//        let tmp = Uart_0::get().baud_rate_register_high.get() & (!0b11111);
-
-        Uart_0::get().baud_rate_register_high.set(((divisor>>8) & 0x1F) as u8);
-        Uart_0::get().baud_rate_register_low.set((divisor & 0xff) as u8);
-//        Uart_0::get().baud_rate_register_high.set(0x0);
-//        Uart_0::get().baud_rate_register_low.set(0x44);
-
-        Uart_0::get().control_register_2.set_bit(2);
-        Uart_0::get().control_register_2.set_bit(3);
-
-
+        SystemIntegrationModule::enable_uart0_clock();
+        Self::disable_tx_rx();
+        SystemIntegrationModule::set_uart0_clock_to_mcgfllclk();
+        Self::set_default_settings();
+        Self::set_uart_baud_rate_using_default_mcgfllclk_clock(baud_rate);
+        Self::enable_tx_rx();
 
     }
 

@@ -9,6 +9,8 @@ pub use self::gpio::Direction;
 pub use self::gpio::Value;
 
 const BASE_SIM : u32 = 0x4004_7000;
+
+
 // System integration Module
 #[repr(C)]
 pub struct SystemIntegrationModule {
@@ -47,8 +49,20 @@ impl SystemIntegrationModule {
             &*(BASE_SIM as *const SystemIntegrationModule)
         }
     }
+
+    pub (in super) fn enable_uart0_clock() {
+        Self::get().system_clock_gating_control_register_4.set_bit(10);
+    }
+
+    pub (in super) fn set_uart0_clock_to_mcgfllclk() {
+        Self::get().system_option_register_2.set_bit(26);
+        Self::get().system_option_register_2.clear_bit(27);
+        Self::get().system_option_register_2.clear_bit(16);
+    }
+
+
     pub fn disable_watchdog_timer(){
-        SystemIntegrationModule::get().cop_control_register.set(00 << 2);
+        Self::get().cop_control_register.set(00 << 2);
 
     }
     pub fn enable_port_for_use(port: PortLetter) -> PortWrapper{
@@ -58,7 +72,7 @@ impl SystemIntegrationModule {
 //        SystemIntegrationModule::get()
 //            .system_clock_gating_control_register_5
 //            .bitwise_inc_or(1 << (9 + (port.clone() as u8)));
-        SystemIntegrationModule::get()
+        Self::get()
             .system_clock_gating_control_register_5
             .set_bit((9 + (port.clone() as u8)));
         PortWrapper::new(port)

@@ -38,15 +38,18 @@ fn main() {
     let mut switch_was_pressed_2 = false;
     let mut switch_was_pressed_3 = false;
 
-        es670::Uart_0::enable_uart(9600);
+        es670::Uart_0::enable_uart(115200);
     loop {
-        es670::Uart_0::send_char('t');
-//        es670::Uart_0::send_char(0b0000_1000);
-//        es670::Uart_0::send_char(0b1000_0000);
+        let rv_char = es670::Uart_0::read_char();
 //        board.turn_on_led(Led::GREEN);
 //        board.delay(500);
 //        board.turn_off_led(Led::GREEN);
-        board.delay(500);
+//        board.delay(500);
+        es670::Uart_0::send_char(rv_char);
+//        es670::Uart_0::send_char(0b0000_1000);
+//        es670::Uart_0::send_char(0b1000_0000);
+
+//        board.delay(500);
 //        board.delay(1000);
 //        board.display_show(Display::DS1, int_to_char(number_times_switch_0_pressed));
 //        board.delay(1);
