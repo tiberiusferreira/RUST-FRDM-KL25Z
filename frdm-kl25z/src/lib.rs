@@ -10,6 +10,7 @@ pub use io::*;
 mod multi_purpose_clock_generator;
 mod system_integration_module;
 mod uart_0;
+mod nvic;
 
 pub use uart_0::Uart_0;
 pub use system_integration_module::PortLetter;

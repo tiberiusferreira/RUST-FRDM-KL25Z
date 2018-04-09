@@ -12,108 +12,49 @@ use es670::{High, Low};
 
 
 fn main() {
-    fn int_to_char(mut int: i32) -> char{
-        int = int%10;
-        match int {
-            0 => '0',
-            1 => '1',
-            2 => '2',
-            3 => '3',
-            4 => '4',
-            5 => '5',
-            6 => '6',
-            7 => '7',
-            8 => '8',
-            9 => '9',
-            _ => ' '
-        }
-    }
     let board = es670::Es670::new();
-    let mut number_times_switch_0_pressed = 4;
-    let mut number_times_switch_1_pressed = 3;
-    let mut number_times_switch_2_pressed = 2;
-    let mut number_times_switch_3_pressed = 1;
-    let mut switch_was_pressed_0 = false;
-    let mut switch_was_pressed_1 = false;
-    let mut switch_was_pressed_2 = false;
-    let mut switch_was_pressed_3 = false;
-
-        es670::Uart_0::enable_uart(115200);
+    es670::Uart_0::enable_uart(115200);
+    es670::Uart_0::enable_rx_interrupts();
     loop {
-        let rv_char = es670::Uart_0::read_char();
-//        board.turn_on_led(Led::GREEN);
-//        board.delay(500);
-//        board.turn_off_led(Led::GREEN);
-//        board.delay(500);
-        es670::Uart_0::send_char(rv_char);
-//        es670::Uart_0::send_char(0b0000_1000);
-//        es670::Uart_0::send_char(0b1000_0000);
-
-//        board.delay(500);
-//        board.delay(1000);
-//        board.display_show(Display::DS1, int_to_char(number_times_switch_0_pressed));
-//        board.delay(1);
-//        board.display_show(Display::DS2, int_to_char(number_times_switch_1_pressed));
-//        board.delay(1);
-//        board.display_show(Display::DS3, int_to_char(number_times_switch_2_pressed));
-//        board.delay(1);
-//        board.display_show(Display::DS4, int_to_char(number_times_switch_3_pressed));
-//        board.delay(1);
-//
-//
-//        if board.get_switch_state(Switch::S1) == Low && !switch_was_pressed_0{
-//            board.turn_off_led(Led::L1);
-//            number_times_switch_0_pressed = number_times_switch_0_pressed + 1;
-//            switch_was_pressed_0 = true;
-//            continue;
-//        }else if board.get_switch_state(Switch::S1) == High{
-//            switch_was_pressed_0 = false;
-//            board.turn_on_led(Led::L1);
-//        }
-//
-//
-//        if board.get_switch_state(Switch::S2) == Low && !switch_was_pressed_1{
-//            board.turn_off_led(Led::L2);
-//            number_times_switch_1_pressed = number_times_switch_1_pressed + 1;
-//            switch_was_pressed_1 = true;
-//            continue;
-//        }else if board.get_switch_state(Switch::S2) == High{
-//            switch_was_pressed_1 = false;
-//            board.turn_on_led(Led::L2);
-//        }
-//
-//
-//        if board.get_switch_state(Switch::S3) == Low && !switch_was_pressed_2{
-//            board.turn_on_led(Led::L3);
-//            number_times_switch_2_pressed = number_times_switch_2_pressed + 1;
-//            switch_was_pressed_2 = true;
-//            continue;
-//        }else if board.get_switch_state(Switch::S3) == High{
-//            board.turn_on_led(Led::L3);
-//            switch_was_pressed_2 = false;
-//        }
-//
-//
-//        if board.get_switch_state(Switch::S4) == Low && !switch_was_pressed_3{
-//            board.turn_off_led(Led::L4);
-//            number_times_switch_3_pressed = number_times_switch_3_pressed + 1;
-//            switch_was_pressed_3 = true;
-//            continue;
-//        }else if board.get_switch_state(Switch::S4) == High{
-//            board.turn_on_led(Led::L4);
-//            switch_was_pressed_3 = false;
-//        }
-
-
+        es670::Uart_0::send_char('f');
+        board.delay(10000);
     }
 }
 
 
 #[link_section = ".vector_table.interrupts"]
 #[used]
-static INTERRUPTS: [extern "C" fn(); 20] = [default_handler; 20];
+pub static INTERRUPTS: [unsafe extern "C" fn(); 20] =
+    [
+        default_handler, // 0
+        default_handler, // 1
+        default_handler, // 2
+        default_handler, // 3
+        default_handler, // 4
+        default_handler, // 5
+        default_handler, // 6
+        default_handler, // 7
+        default_handler, // 8
+        default_handler, // 9
+        default_handler, // 10
+        default_handler, // 11
+        uart0_irq_handler, // 12
+        default_handler, // 13
+        default_handler, // 14
+        default_handler, // 15
+        default_handler, // 16
+        default_handler, // 17
+        default_handler, // 18
+        default_handler, // 19
+    ]
+;
 
-extern "C" fn default_handler() {
+pub extern "C" fn default_handler() {
     asm::bkpt();
+}
+
+pub extern "C" fn uart0_irq_handler() {
+    let rx_char =  es670::Uart_0::read_char();
+    es670::Uart_0::send_char(rx_char);
 }
 

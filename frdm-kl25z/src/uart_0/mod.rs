@@ -70,7 +70,7 @@ impl Uart_0 {
         Self::get().data_register.set(bytes as u8);
     }
 
-    fn rx_buffer_full() -> bool{
+    pub fn rx_buffer_full() -> bool{
         return Self::get().status_register_1.get_bit(5);
     }
 
@@ -78,6 +78,16 @@ impl Uart_0 {
         while !Self::rx_buffer_full(){}
         return Self::get().data_register.get() as char;
     }
+
+    pub fn enable_rx_interrupts(){
+        nvic::Nvic::enable_uart0_interrupt();
+        Self::get().control_register_2.set_bit(5);
+    }
+
+    pub fn disable_rx_interrupts(){
+        Self::get().control_register_2.clear_bit(5);
+    }
+
 
     pub fn enable_uart(baud_rate: i32){
 
