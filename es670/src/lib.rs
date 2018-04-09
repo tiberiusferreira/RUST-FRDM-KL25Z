@@ -31,7 +31,21 @@ impl Es670{
         let gpio = port.set_pin_as_gpio(pin);
         return gpio
     }
+    pub fn turn_on_buzzer(&self, duration: u32){
+        let port = self.frdm_kl25z.get_port(frdm_kl25z::PortLetter::PortD);
+        let gpio_18 = port.set_pin_as_gpio(Pin::Pin0);
+        let mut time_left: i32 = duration as i32;
+        while time_left > 0 {
+            gpio_18.set_direction(Direction::Out);
+            gpio_18.set_value(Value::Low);
+            self.delay(1);
+            gpio_18.set_direction(Direction::Out);
+            gpio_18.set_value(Value::High);
+            self.delay(1);
+            time_left = time_left - 2;
+        }
 
+    }
 
     pub fn delay(&self, ms: u32){
         self.frdm_kl25z.delay_ms(ms);

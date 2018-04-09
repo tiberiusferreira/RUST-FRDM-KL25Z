@@ -70,6 +70,12 @@ impl Uart_0 {
         Self::get().data_register.set(bytes as u8);
     }
 
+    pub fn send_string(string: &str){
+        for c in string.chars() {
+            Self::send_char(c);
+        }
+    }
+
     pub fn rx_buffer_full() -> bool{
         return Self::get().status_register_1.get_bit(5);
     }
