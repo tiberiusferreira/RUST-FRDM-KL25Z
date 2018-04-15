@@ -6,9 +6,12 @@ extern crate es670;
 extern crate cortex_m;
 extern crate cortex_m_rt;
 extern crate cortex_m_semihosting;
+extern crate arraydeque;
 use cortex_m::asm;
 use es670::*;
 use es670::{High, Low};
+use arraydeque::{ArrayDeque, Saturating, Array};
+static mut INTERRUPTS_DEQUE: Option<ArrayDeque<[char; 20], Saturating>> = None;
 enum State{
     Idle,
     LedCmd,
@@ -27,7 +30,6 @@ struct StateMachine{
 }
 
 impl State {
-
     fn send_ack(){
         for c in "ACK".chars() {
             es670::Uart_0::send_char(c);
@@ -45,15 +47,12 @@ impl State {
             Idle => {
                 match input {
                     'L' | 'l' => {
-                        Self::send_ack();
                         State::LedCmd
                     },
                     'S' | 's' => {
-                        Self::send_ack();
                         State::SwitchCmd
                     },
                     'B' | 'b' => {
-                        Self::send_ack();
                         State::BuzzerCmd
                     },
                     _ => {
@@ -65,11 +64,9 @@ impl State {
             LedCmd => {
                 match input {
                     'C' | 'c' => {
-                        Self::send_ack();
                         State::LedCmdTurnOff
                     },
                     'S' | 's' => {
-                        Self::send_ack();
                         State::LedCmdTurnOn
                     },
                     _ => {
@@ -155,7 +152,6 @@ impl State {
                         State::Idle
                     },
                     Some(digit) => {
-                        Self::send_ack();
                         State::BuzzerCmdDig1(digit.clone()*100)
                     },
                 }
@@ -167,7 +163,6 @@ impl State {
                         State::Idle
                     },
                     Some(digit) => {
-                        Self::send_ack();
                         State::BuzzerCmdDig2(digit2 + digit.clone()*10)
                     },
                 }
@@ -180,11 +175,8 @@ impl State {
                     },
                     Some(digit) => {
                         Self::send_ack();
-
                         let duration = digit21 + digit;
-//                        Uart_0::send_char(digit);
                         board.turn_on_buzzer(duration);
-
                         State::Idle
                     },
                 }
@@ -204,22 +196,51 @@ impl StateMachine{
 }
 
 
-
+fn mutate_state_machine_with_deque_chars<A>(deque: &mut ArrayDeque<A, Saturating>, mut state_machine: StateMachine) -> StateMachine
+    where A: Array<Item = char>{
+    loop{
+        match deque.pop_front(){
+            None=>{
+                break;
+            },
+            Some(rx_char) => {
+                state_machine = state_machine.handle_input(rx_char);
+            }
+        }
+    }
+    state_machine
+}
 
 fn main() {
     let board = es670::Es670::new();
-    es670::Uart_0::enable_uart(115200);
+    let deque = Some(ArrayDeque::new());
+    /* ARMv6 does not support synchronization instruction
+     * But since we are using this before enabling interruption it should be safe
+    */
+    unsafe {
+        INTERRUPTS_DEQUE = deque;
+    }
 
-    //    es670::Uart_0::enable_rx_interrupts();
+//    board.uart()
     let mut state_machine: StateMachine = StateMachine{
         state: State::Idle,
         board: es670::Es670::new(),
     };
-//    board.turn_on_buzzer(1000);
+    board.enable_uart(115200);
     loop {
-
-        let rx_char =  es670::Uart_0::read_char();
-        state_machine = state_machine.handle_input(rx_char);
+        board.disable_uart_rx_interrupts();
+        unsafe {
+            match INTERRUPTS_DEQUE {
+                None => {
+                    board.send_string("INTERRUPTS_DEQUE was not initialized!");
+                },
+                Some(ref mut deque) => {
+                    state_machine = mutate_state_machine_with_deque_chars(deque, state_machine);
+                }
+            }
+        }
+        board.enable_uart_rx_interrupts();
+        board.delay(1000);
     }
 }
 
@@ -257,7 +278,15 @@ pub extern "C" fn default_handler() {
 
 pub extern "C" fn uart0_irq_handler() {
     let rx_char =  es670::Uart_0::read_char();
-//    STATE_MACHINE.handle_input(rx_char);
-    es670::Uart_0::send_char(rx_char);
+    unsafe {
+        match INTERRUPTS_DEQUE {
+            None => {},
+            Some(ref mut deque) => {
+                if let Err(_) = deque.push_back(rx_char){
+                    Uart_0::send_string("Interrupt DEQUE is full!");
+                }
+            }
+        }
+    }
 }
 

@@ -69,12 +69,9 @@ impl SystemIntegrationModule {
         // Enabling clock on Port
         // For port A set bit 9 (starting from 0) to 1
         // for B set bit 10, for C set bit 11 and so on
-//        SystemIntegrationModule::get()
-//            .system_clock_gating_control_register_5
-//            .bitwise_inc_or(1 << (9 + (port.clone() as u8)));
         Self::get()
             .system_clock_gating_control_register_5
-            .set_bit((9 + (port.clone() as u8)));
+            .set_bit(9 + (port.clone() as u8));
         PortWrapper::new(port)
     }
 

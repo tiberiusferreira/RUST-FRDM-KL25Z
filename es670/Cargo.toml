@@ -5,14 +5,14 @@ authors = ["Tiberio D A R Ferreira <tiberiusferreira@gmail.com>"]
 
 [dependencies]
 frdm_kl25z = { path = "../frdm-kl25z" }
-cortex-m = "0.4.0"
-cortex-m-semihosting = "0.2.0"
+cortex-m = "*"
+cortex-m-semihosting = "*"
 # alloc-cortex-m release doesn't use linked_list_allocator v0.5.0 yet.
 # Uncomment for the allocator example.
 #alloc-cortex-m = "0.3.2"
 
 [dependencies.cortex-m-rt]
-version = "0.3.12"
+version = "*"
 # Comment for the panic example.
 features = ["abort-on-panic"]
 

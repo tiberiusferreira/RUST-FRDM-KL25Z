@@ -5,22 +5,22 @@ const BASE_UART_0 : u32 = 0x4006_A000;
 // System integration Module
 #[repr(C)]
 pub struct Uart_0 {
-    pub baud_rate_register_high: VolatileRW<u8>,
-    pub baud_rate_register_low: VolatileRW<u8>,
-    pub control_register_1 : VolatileRW<u8>,
-    pub control_register_2: VolatileRW<u8>,
-    pub status_register_1 : VolatileRW<u8>,
-    pub status_register_2: VolatileRW<u8>,
-    pub control_register_3: VolatileRW<u8>,
-    pub data_register : VolatileRW<u8>,
-    pub match_address_register_1: VolatileRW<u8>,
-    pub match_address_register_2 : VolatileRW<u8>,
-    pub control_register_4: VolatileRW<u8>, //read only
-    pub control_register_5 : VolatileRW<u8>,
+    baud_rate_register_high: VolatileRW<u8>,
+    baud_rate_register_low: VolatileRW<u8>,
+    control_register_1 : VolatileRW<u8>,
+    control_register_2: VolatileRW<u8>,
+    status_register_1 : VolatileRW<u8>,
+    status_register_2: VolatileRW<u8>,
+    control_register_3: VolatileRW<u8>,
+    data_register : VolatileRW<u8>,
+    match_address_register_1: VolatileRW<u8>,
+    match_address_register_2 : VolatileRW<u8>,
+    control_register_4: VolatileRW<u8>, //read only
+    control_register_5 : VolatileRW<u8>,
 }
 
 impl Uart_0 {
-    fn get() -> &'static Uart_0 {
+    pub fn get() -> &'static Uart_0 {
         unsafe {
             &*(BASE_UART_0 as *const Uart_0)
         }
@@ -43,7 +43,7 @@ impl Uart_0 {
         Self::get().status_register_2.set(0b0000_0000);
     }
 
-    fn set_uart_baud_rate_using_default_mcgfllclk_clock(baud_rate: i32){
+    fn set_uart_baud_rate_using_default_mcgfllclk_clock(baud_rate: u32){
         let over_sample = 16;
         let uart0 = Self::get();
         /*
@@ -51,7 +51,7 @@ impl Uart_0 {
         * The default settings give 20.97Mhz clock
         * See section 24.5.2 "Using a 32.768 kHz reference" of the datasheet for more info
         */
-        const MCGFLLCLK_CLOCK :i32= 20_970_000;
+        const MCGFLLCLK_CLOCK :u32= 20_970_000;
         let divisor: u16 = ((MCGFLLCLK_CLOCK / (over_sample)) / baud_rate) as u16;
 
         uart0.control_register_4.bitwise_inc_or_u8(0b0000_1111);
@@ -95,7 +95,7 @@ impl Uart_0 {
     }
 
 
-    pub fn enable_uart(baud_rate: i32){
+    pub fn enable_uart(baud_rate: u32){
 
         let port_a = SystemIntegrationModule::enable_port_for_use(PortLetter::PortA);
 

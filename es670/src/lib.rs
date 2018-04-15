@@ -26,6 +26,30 @@ impl Es670{
         es670
     }
 
+    pub fn uart_send_char(&self, c: char){
+        frdm_kl25z::Uart_0::send_char(c);
+    }
+
+    pub fn enable_uart(&self, baud_rate: u32){
+        frdm_kl25z::Uart_0::enable_uart(baud_rate);
+    }
+
+    pub fn send_string(&self, string: &str){
+        frdm_kl25z::Uart_0::send_string(string);
+    }
+
+    pub fn enable_uart_rx_interrupts(&self){
+        frdm_kl25z::Uart_0::enable_rx_interrupts();
+    }
+
+    pub fn disable_uart_rx_interrupts(&self){
+        frdm_kl25z::Uart_0::disable_rx_interrupts();
+    }
+
+    pub fn uart_blocking_read_char(&self) -> char{
+        frdm_kl25z::Uart_0::read_char()
+    }
+
     pub fn get_gpio(&self, port: PortLetter, pin: Pin) -> Gpio{
         let port = self.frdm_kl25z.get_port(port);
         let gpio = port.set_pin_as_gpio(pin);
@@ -168,8 +192,6 @@ impl Es670{
                 gpio = port.set_pin_as_gpio(Pin::Pin10);
             }
         }
-
-        //
         let seg_a = port.set_pin_as_gpio(Pin::Pin0);
         let seg_b = port.set_pin_as_gpio(Pin::Pin1);
         let seg_c = port.set_pin_as_gpio(Pin::Pin2);
@@ -179,7 +201,6 @@ impl Es670{
         let seg_g = port.set_pin_as_gpio(Pin::Pin6);
         let seg_dp = port.set_pin_as_gpio(Pin::Pin7);
         seg_dp.set_value(Low);
-        //
         match input_char {
             'a' | 'A' =>{
                 seg_a.set_value(High);

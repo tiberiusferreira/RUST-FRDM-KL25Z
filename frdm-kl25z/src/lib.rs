@@ -32,6 +32,10 @@ pub trait FrdmKl25z{
     fn disable_watchdog_timer(&self);
     fn get_port(&self, port: PortLetter) -> PortWrapper;
     fn delay_ms(&self, millis: u32);
+    fn enable_uart0(&self, baud_rate: u32);
+    fn enable_rx_interrupts(&self);
+    fn send_char(&self, c: char);
+    fn send_string(&self, s: &str);
 }
 
 impl FrdmKl25zBoard {
@@ -52,6 +56,7 @@ impl FrdmKl25zBoard {
     }
 }
 impl FrdmKl25z for FrdmKl25zBoard{
+
     fn new() -> FrdmKl25zBoard{
         FrdmKl25zBoard{}
     }
@@ -69,5 +74,19 @@ impl FrdmKl25z for FrdmKl25zBoard{
             millis = millis - 1;
         }
     }
+    fn enable_uart0(&self, baud_rate: u32) {
+        Uart_0::enable_uart(baud_rate);
+    }
 
+    fn enable_rx_interrupts(&self) {
+        Uart_0::enable_rx_interrupts();
+    }
+
+    fn send_char(&self, c: char) {
+        Uart_0::send_char(c);
+    }
+
+    fn send_string(&self, s: &str) {
+        Uart_0::send_string(s);
+    }
 }

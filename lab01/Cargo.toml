@@ -6,17 +6,19 @@ authors = ["Tiberio D A R Ferreira <tiberiusferreira@gmail.com>"]
 
 
 [dependencies]
+arraydeque = { version = "0.4", default-features = false }
 es670 = { path = "../es670" }
-cortex-m = "0.4.0"
-cortex-m-semihosting = "0.2.0"
+
+cortex-m = "*"
+cortex-m-semihosting = "*"
 # alloc-cortex-m release doesn't use linked_list_allocator v0.5.0 yet.
 # Uncomment for the allocator example.
 #alloc-cortex-m = "0.3.2"
 
 [dependencies.cortex-m-rt]
-version = "0.3.12"
-# Comment for the panic example.
+version = "*"
 features = ["abort-on-panic"]
+
 
 # Uncomment for the device example.
 # [dependencies.stm32f103xx]
@@ -30,7 +32,5 @@ codegen-units = 1
 incremental = false
 
 [profile.release]
-codegen-units = 1
-incremental = false
+lto = true
 debug = true
-lto = false
