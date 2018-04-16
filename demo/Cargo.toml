@@ -1,13 +1,13 @@
 [package]
 build = "build.rs"
-name = "lab01"
+name = "demo"
 version = "0.1.0"
 authors = ["Tiberio D A R Ferreira <tiberiusferreira@gmail.com>"]
 
 
 [dependencies]
 arraydeque = { version = "0.4", default-features = false }
-es670 = { path = "../es670" }
+es670_board = { path = "../es670_board" }
 
 cortex-m = "*"
 cortex-m-semihosting = "*"

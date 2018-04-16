@@ -12,43 +12,20 @@ pub use display::*;
 pub use frdm_kl25z::*;
 
 pub use frdm_kl25z::Value::{High, Low};
-pub struct Es670{
+pub struct Es670Board {
     frdm_kl25z:  frdm_kl25z::FrdmKl25zBoard
 }
 
 
-impl Es670{
-    pub fn new() -> Es670{
-        let es670 = Es670{
+impl Es670Board {
+    pub fn new() -> Es670Board {
+        let es670_board = Es670Board {
             frdm_kl25z: FrdmKl25zBoard::new()
         };
-        es670.frdm_kl25z.disable_watchdog_timer();
-        es670
+        es670_board.frdm_kl25z.disable_watchdog_timer();
+        es670_board
     }
 
-    pub fn uart_send_char(&self, c: char){
-        frdm_kl25z::Uart_0::send_char(c);
-    }
-
-    pub fn enable_uart(&self, baud_rate: u32){
-        frdm_kl25z::Uart_0::enable_uart(baud_rate);
-    }
-
-    pub fn send_string(&self, string: &str){
-        frdm_kl25z::Uart_0::send_string(string);
-    }
-
-    pub fn enable_uart_rx_interrupts(&self){
-        frdm_kl25z::Uart_0::enable_rx_interrupts();
-    }
-
-    pub fn disable_uart_rx_interrupts(&self){
-        frdm_kl25z::Uart_0::disable_rx_interrupts();
-    }
-
-    pub fn uart_blocking_read_char(&self) -> char{
-        frdm_kl25z::Uart_0::read_char()
-    }
 
     pub fn get_gpio(&self, port: PortLetter, pin: Pin) -> Gpio{
         let port = self.frdm_kl25z.get_port(port);
