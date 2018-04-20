@@ -6,6 +6,7 @@ extern crate frdm_kl25z;
 mod led;
 mod display;
 mod switch;
+mod lcd;
 pub use switch::*;
 pub use led::*;
 pub use display::*;

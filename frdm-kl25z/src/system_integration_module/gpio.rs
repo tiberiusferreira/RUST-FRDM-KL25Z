@@ -13,6 +13,20 @@ pub enum Value{
     High,
     Low
 }
+
+impl From<bool> for Value {
+    fn from(boolean: bool) -> Self {
+        match boolean {
+            true =>{
+                Value::High
+            },
+            false =>{
+                Value::Low
+            }
+        }
+    }
+}
+
 fn get_bit_at(input: u32, n: u8) -> bool {
     if n < 32 {
         input & (1 << n) != 0

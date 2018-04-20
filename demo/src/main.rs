@@ -17,30 +17,14 @@ static mut INTERRUPTS_DEQUE: Option<ArrayDeque<[char; 20], Saturating>> = None;
 
 fn main() {
     let board = Es670Board::new();
-    let deque = Some(ArrayDeque::new());
-    /* ARMv6 does not support synchronization instruction
-     * But since we are using this before enabling interruption it should be safe
-    */
-    unsafe {
-        INTERRUPTS_DEQUE = deque;
-    }
+    board.lcd_clear();
+    board.lcd_set_cursor(0, 0);
+    board.write_string("Tiberio Ferreira");
+    board.lcd_set_cursor(1, 5);
+    board.write_string("139187");
 
-    let mut state_machine: StateMachine = StateMachine::new();
-    Uart_0::enable_uart(115200);
-    loop {
-        Uart_0::disable_rx_interrupts();
-        unsafe {
-            match INTERRUPTS_DEQUE {
-                None => {
-                    Uart_0::send_string("INTERRUPTS_DEQUE was not initialized!");
-                },
-                Some(ref mut deque) => {
-                    state_machine = mutate_state_machine_with_deque_chars(deque, state_machine);
-                }
-            }
-        }
-        Uart_0::enable_rx_interrupts();
-        board.delay(100);
+    loop{
+
     }
 }
 
