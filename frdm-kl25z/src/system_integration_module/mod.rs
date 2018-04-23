@@ -1,3 +1,11 @@
+/* ************************************************************ */
+/* File name:        mod.rs                                     */
+/* File description: This module                                */
+/*                   implements the system_integration_module   */
+/* Author name:      tiberioferreira                            */
+/* Creation date:    14abr2018                                  */
+/* Revision date:    23abr2015                                  */
+/* ************************************************************ */
 use io::VolatileRW;
 mod port;
 mod gpio;

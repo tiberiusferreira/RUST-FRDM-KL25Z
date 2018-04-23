@@ -52,12 +52,28 @@ pub struct PortWrapper{
 }
 
 impl PortWrapper{
+
+
+    /* ***************************************************** */
+    /* Method name:        new                               */
+    /* Method description: initializes a port and returns a  */
+    /*                     wrapper to it                     */
+    /* Input params:       port: the port to initialize      */
+    /* Output params:      The port wrapper                  */
+    /* ***************************************************** */
     pub (in super) fn new(port: PortLetter) -> PortWrapper{
         PortWrapper{
             raw_port_mem: PortRegisters::get(port.clone()),
             port_letter: port
         }
     }
+
+    /* ***************************************************** */
+    /* Method name:        set_pin_as_gpio                   */
+    /* Method description: sets the given pin as GPIO        */
+    /* Input params:       pin: the pin to configure as GPIO */
+    /* Output params:      The Gpio initialized              */
+    /* ***************************************************** */
     pub fn set_pin_as_gpio(&self, pin: Pin) -> Gpio {
         // Clear all bits
         self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_and(!(0b111 << 8));
@@ -65,6 +81,14 @@ impl PortWrapper{
         self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_inc_or(0b1 << 8);
         Gpio::new(self.port_letter.clone(), pin)
     }
+
+    /* ***************************************************** */
+    /* Method name:        set_pin_as_alt2                   */
+    /* Method description: sets the given pin to function    */
+    /*                     alt2                              */
+    /* Input params:       pin: the pin to configure as alt2 */
+    /* Output params:                                        */
+    /* ***************************************************** */
     pub fn set_pin_as_alt2(&self, pin: Pin) {
         // Clear all bits
         self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_and(!(0b111 << 8));

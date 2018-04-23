@@ -1,3 +1,12 @@
+/* ************************************************************ */
+/* File name:        lib.rs                                     */
+/* File description: This module                                */
+/*                   implements the FrdmKl25zBoard board        */
+/*                   functionality                              */
+/* Author name:      tiberioferreira                            */
+/* Creation date:    14abr2018                                  */
+/* Revision date:    23abr2015                                  */
+/* ************************************************************ */
 #![feature(used)]
 #![no_std]
 #![feature(core_intrinsics)]
@@ -12,7 +21,7 @@ mod system_integration_module;
 mod uart_0;
 mod nvic;
 
-pub use uart_0::Uart_0;
+pub use uart_0::Uart0;
 pub use system_integration_module::PortLetter;
 pub use system_integration_module::PortWrapper;
 pub use system_integration_module::Gpio;
@@ -28,9 +37,41 @@ pub struct FrdmKl25zBoard{
 }
 
 pub trait FrdmKl25z{
+    /* ***************************************************** */
+    /* Method name:        new                               */
+    /* Method description: Creates a new FrdmKl25zBoard      */
+    /*                     instance                          */
+    /* Input params:                                         */
+    /* Output params:      FrdmKl25zBoard instance           */
+    /* ***************************************************** */
     fn new() -> FrdmKl25zBoard;
+
+    /* ***************************************************** */
+    /* Method name:        disable_watchdog_timer            */
+    /* Method description: disables the watchdog timer       */
+    /*                     instance                          */
+    /* Input params:                                         */
+    /* Output params:                                        */
+    /* ***************************************************** */
     fn disable_watchdog_timer(&self);
+
+    /* ***************************************************** */
+    /* Method name:        get_port                          */
+    /* Method description: returns a PortWrapper so a port   */
+    /*                     can be used                       */
+    /* Input params:       port: which port to be initialized*/
+    /*                     and wrapped                       */
+    /* Output params:      the port wrapper                  */
+    /* ***************************************************** */
     fn get_port(&self, port: PortLetter) -> PortWrapper;
+
+    /* ***************************************************** */
+    /* Method name:        delay_ms                          */
+    /* Method description: busy waits                        */
+    /* Input params:       millis: how long to wait in       */
+    /*                     milliseconds                      */
+    /* Output params:                                        */
+    /* ***************************************************** */
     fn delay_ms(&self, millis: u32);
 }
 

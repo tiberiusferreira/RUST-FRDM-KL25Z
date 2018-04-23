@@ -1,3 +1,13 @@
+/* ********************************************** */
+/* File name:        serial_state_machine.rs      */
+/* File description: This file implements the     */
+/*                   state machine used to        */
+/*                   control the board using      */
+/*                   communication                */
+/* Author name:      tiberioferreira              */
+/* Creation date:    14abr2018                    */
+/* Revision date:    23abr2015                    */
+/* ********************************************** */
 extern crate es670_board;
 extern crate cortex_m;
 extern crate cortex_m_rt;
@@ -23,14 +33,16 @@ pub struct StateMachine{
 }
 
 impl State {
+
+
     fn send_ack(){
         for c in "ACK".chars() {
-            Uart_0::send_char(c);
+            Uart0::send_char(c);
         }
     }
     fn send_err(){
         for c in "ERR".chars() {
-            Uart_0::send_char(c);
+            Uart0::send_char(c);
         }
     }
     fn next(self, input: char, board: &Es670Board) -> State {
@@ -141,11 +153,11 @@ impl State {
                         match board.get_switch_state(Switch::S3){
                             High => {
                                 Self::send_ack();
-                                Uart_0::send_char('O');
+                                Uart0::send_char('O');
                             },
                             Low => {
                                 Self::send_ack();
-                                Uart_0::send_char('C');
+                                Uart0::send_char('C');
                             }
                         }
                         State::Idle
@@ -154,11 +166,11 @@ impl State {
                         match board.get_switch_state(Switch::S4){
                             High => {
                                 Self::send_ack();
-                                Uart_0::send_char('O');
+                                Uart0::send_char('O');
                             },
                             Low => {
                                 Self::send_ack();
-                                Uart_0::send_char('C');
+                                Uart0::send_char('C');
                             }
                         }
                         State::Idle
@@ -211,12 +223,27 @@ impl State {
 }
 
 impl StateMachine{
+    /* ***************************************************** */
+    /* Method name:        new                               */
+    /* Method description: Creates a new StateMachine        */
+    /*                     instance                          */
+    /* Input params:                                         */
+    /* Output params:      StateMachine instance             */
+    /* ***************************************************** */
     pub fn new() -> StateMachine{
         StateMachine{
             state: State::Idle,
             board: Es670Board::new(),
         }
     }
+    /* ***************************************************** */
+    /* Method name:        handle_input                      */
+    /* Method description: Mutates the StateMachine          */
+    /*                     consuming it according to the     */
+    /*                     input                             */
+    /* Input params:       input is the character input      */
+    /* Output params:      A new mutated StateMachine        */
+    /* ***************************************************** */
     pub fn handle_input(self, input: char) -> StateMachine{
         StateMachine{
             state: self.state.next(input, &self.board),
@@ -225,7 +252,15 @@ impl StateMachine{
     }
 }
 
-
+    /* ********************************************************* */
+    /* Method name:        mutate_state_machine_with_deque_chars */
+    /* Method description: Mutates the StateMachine              */
+    /*                     consuming it according to the         */
+    /*                     input in the double ended queue       */
+    /* Input params:       input is the deque containing the     */
+    /*                     character inputs                      */
+    /* Output params:      A new mutated StateMachine            */
+    /* ********************************************************  */
 pub fn mutate_state_machine_with_deque_chars<A>(deque: &mut ArrayDeque<A, Saturating>, mut state_machine: StateMachine) -> StateMachine
     where A: Array<Item = char>{
     loop{

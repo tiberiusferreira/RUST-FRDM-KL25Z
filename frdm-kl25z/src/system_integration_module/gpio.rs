@@ -43,6 +43,7 @@ pub struct Gpio{
 }
 
 impl Gpio{
+
     pub fn new(port: PortLetter, pin: Pin) -> Gpio{
         Gpio{
             port: port.clone(),

@@ -44,6 +44,12 @@ pub enum BitPositionsU8 {
 
 impl Es670Board{
 
+    /* ***************************************************** */
+    /* Method name:        lcd_clear                         */
+    /* Method description: clears the LCD display            */
+    /* Input params:                                         */
+    /* Output params:      The cleared LCD pins              */
+    /* ***************************************************** */
     pub fn lcd_clear(&self) -> LcdPins {
         let lcd = self.lcd_init_pins();
 
@@ -57,7 +63,15 @@ impl Es670Board{
         self.write_to_lcd(CMD_CURSOR2R, true);
         lcd
     }
-    fn lcd_init_pins(&self) -> LcdPins {
+
+    /* ***************************************************** */
+    /* Method name:        lcd_init_pins                     */
+    /* Method description: initializes the LCD pins,         */
+    /*                     allowing them to be used          */
+    /* Input params:                                         */
+    /* Output params:      The initialized LCD pins          */
+    /* ***************************************************** */
+    pub fn lcd_init_pins(&self) -> LcdPins {
 
         let rs = self.get_gpio(PortLetter::PortC, Pin::Pin8);
         let enable = self.get_gpio(PortLetter::PortC, Pin::Pin9);
@@ -92,6 +106,15 @@ impl Es670Board{
         }
     }
 
+    /* ***************************************************** */
+    /* Method name:        lcd_set_cursor                    */
+    /* Method description: sets the cursor position          */
+    /* Input params:       line: which line to set it to,    */
+    /*                     can be 0 or >0 for line 0 or 1    */
+    /*                     col_left_to_right: in which column*/
+    /*                     to write, starting from left      */
+    /* Output params:                                        */
+    /* ***************************************************** */
     pub fn lcd_set_cursor(&self, line: u8, col_left_to_right: u8) {
         let mut c_command;
 
@@ -108,10 +131,23 @@ impl Es670Board{
     }
 
 
+    /* ***************************************************** */
+    /* Method name:        write_char                        */
+    /* Method description: writes a char to the LCD          */
+    /* Input params:       char: the char to be written              */
+    /* Output params:                                        */
+    /* ***************************************************** */
     pub fn write_char(&self, c: char){
         self.write_to_lcd(c as u8, false);
     }
 
+
+    /* ***************************************************** */
+    /* Method name:        write_string                      */
+    /* Method description: writes a string to the LCD        */
+    /* Input params:       string: the string to be written  */
+    /* Output params:                                        */
+    /* ***************************************************** */
     pub fn write_string(&self, string: &str){
         for c in string.chars(){
             self.write_to_lcd(c as u8, false);
@@ -122,6 +158,15 @@ impl Es670Board{
         return (data & (1 << at as u8)) != 0;
     }
 
+    /* ***************************************************** */
+    /* Method name:        write_to_lcd                      */
+    /* Method description: writes the data to the LCD        */
+    /*                     pins                              */
+    /* Input params:       data: the data to be written      */
+    /*                     is_cmd: boolean representing if   */
+    /*                     the data is a command or data     */
+    /* Output params:                                        */
+    /* ***************************************************** */
     pub fn write_to_lcd(&self, data: u8, is_cmd: bool){
         let lcd = self.lcd_init_pins();
         if is_cmd{

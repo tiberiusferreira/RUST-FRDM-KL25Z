@@ -1,3 +1,11 @@
+/* ********************************************** */
+/* File name:        lib.rs                       */
+/* File description: This file implements the     */
+/*                   es670 board  specifics       */
+/* Author name:      tiberioferreira              */
+/* Creation date:    05mar2018                    */
+/* Revision date:    23abr2015                    */
+/* ********************************************** */
 #![feature(used)]
 #![no_std]
 #![feature(core_intrinsics)]
@@ -19,6 +27,15 @@ pub struct Es670Board {
 
 
 impl Es670Board {
+
+    /* ***************************************************** */
+    /* Method name:        new                               */
+    /* Method description: Creates a new Es670Board          */
+    /*                     instance disabling watchdog in    */
+    /*                     in the process                    */
+    /* Input params:                                         */
+    /* Output params:      Es670Board instance               */
+    /* ***************************************************** */
     pub fn new() -> Es670Board {
         let es670_board = Es670Board {
             frdm_kl25z: FrdmKl25zBoard::new()
@@ -28,6 +45,14 @@ impl Es670Board {
     }
 
 
+    /* ***************************************************** */
+    /* Method name:        get_gpio                          */
+    /* Method description: provides direct access to a GPIO  */
+    /* Input params:       port => which port has the desired*/
+    /*                     GPIO. pin => which pin of the port*/
+    /*                     to use                            */
+    /* Output params:      Gpio instance                     */
+    /* ***************************************************** */
     pub fn get_gpio(&self, port: PortLetter, pin: Pin) -> Gpio{
         let port = self.frdm_kl25z.get_port(port);
         let gpio = port.set_pin_as_gpio(pin);
@@ -48,11 +73,24 @@ impl Es670Board {
         }
 
     }
-
+    /* ***************************************************** */
+    /* Method name:        delay                             */
+    /* Method description: implements busy waiting           */
+    /* Input params:       ms => how long to wait in         */
+    /*                     milliseconds                      */
+    /* Output params:                                        */
+    /* ***************************************************** */
     pub fn delay(&self, ms: u32){
         self.frdm_kl25z.delay_ms(ms);
     }
 
+
+    /* ***************************************************** */
+    /* Method name:        turn_on_led                       */
+    /* Method description: turns on a given Led              */
+    /* Input params:       led => which led to turn on       */
+    /* Output params:                                        */
+    /* ***************************************************** */
     pub fn turn_on_led(&self, led: Led){
         match led{
             Led::RED => {
@@ -100,6 +138,12 @@ impl Es670Board {
         }
     }
 
+    /* ***************************************************** */
+    /* Method name:        turn_off_led                      */
+    /* Method description: turns off a given Led             */
+    /* Input params:       led => which led to turn off       */
+    /* Output params:                                        */
+    /* ***************************************************** */
     pub fn turn_off_led(&self, led: Led){
         match led{
             Led::RED => {
@@ -147,6 +191,16 @@ impl Es670Board {
         }
     }
 
+
+    /* ***************************************************** */
+    /* Method name:        display_show                      */
+    /* Method description: displays a char on the display    */
+    /*                     can a number or A B C D or F      */
+    /* Input params:       display => on which display to    */
+    /*                     show on. input_char which char to */
+    /*                     show                              */
+    /* Output params:                                        */
+    /* ***************************************************** */
     pub fn display_show(&self, display: Display, input_char: char){
         let port = self.frdm_kl25z.get_port(frdm_kl25z::PortLetter::PortC);
         let gpio;
@@ -340,6 +394,14 @@ impl Es670Board {
 
     }
 
+
+
+    /* ***************************************************** */
+    /* Method name:        display_clear                     */
+    /* Method description: clears the displays               */
+    /* Input params:                                         */
+    /* Output params:                                        */
+    /* ***************************************************** */
     pub fn display_clear(&self){
         let port = self.frdm_kl25z.get_port(frdm_kl25z::PortLetter::PortC);
         // Disable all displays to clean up previous calls to display show

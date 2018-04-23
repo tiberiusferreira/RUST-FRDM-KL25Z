@@ -1,3 +1,12 @@
+/* ********************************************** */
+/* File name:        main.rs                      */
+/* File description: This file implements sample  */
+/*                   program used to demonstrate  */
+/*                   each part of the project     */
+/* Author name:      tiberioferreira              */
+/* Creation date:    05mar2018                    */
+/* Revision date:    23abr2015                    */
+/* ********************************************** */
 #![no_std]
 #![feature(used)]
 #![feature(core_intrinsics)]
@@ -7,8 +16,8 @@ extern crate cortex_m;
 extern crate cortex_m_rt;
 extern crate cortex_m_semihosting;
 extern crate arraydeque;
-mod serial_state_machine;
-use serial_state_machine::*;
+//mod serial_state_machine;
+//use serial_state_machine::*;
 use cortex_m::asm;
 use es670_board::*;
 use arraydeque::{ArrayDeque, Saturating};
@@ -61,13 +70,13 @@ pub extern "C" fn default_handler() {
 }
 
 pub extern "C" fn uart0_irq_handler() {
-    let rx_char =  Uart_0::read_char();
+    let rx_char =  Uart0::read_char();
     unsafe {
         match INTERRUPTS_DEQUE {
             None => {},
             Some(ref mut deque) => {
                 if let Err(_) = deque.push_back(rx_char){
-                    Uart_0::send_string("Interrupt DEQUE is full!\n");
+                    Uart0::send_string("Interrupt DEQUE is full!\n");
                 }
             }
         }

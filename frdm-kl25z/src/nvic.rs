@@ -1,3 +1,11 @@
+/* ************************************************************ */
+/* File name:        nvic.rs                                     */
+/* File description: This module                                */
+/*                   implements the nvic                        */
+/* Author name:      tiberioferreira                            */
+/* Creation date:    14abr2018                                  */
+/* Revision date:    23abr2015                                  */
+/* ************************************************************ */
 use io::VolatileRW;
 
 const NVIC_BASE : u32 = 0xE000E100;
