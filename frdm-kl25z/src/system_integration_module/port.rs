@@ -101,6 +101,28 @@ impl PortWrapper{
         self.raw_port_mem.pin_control_register[pin.clone() as usize].set_bit(1);
 //        Gpio::new(self.port_letter.clone(), pin)
     }
+
+    /* ***************************************************** */
+    /* Method name:        set_pin_as_alt4                   */
+    /* Method description: sets the given pin to function    */
+    /*                     alt2                              */
+    /* Input params:       pin: the pin to configure as alt4 */
+    /* Output params:                                        */
+    /* ***************************************************** */
+    pub fn set_pin_as_alt4(&self, pin: Pin) {
+        // Clear all bits
+        self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_and(!(0b111 << 8));
+        // Set bit 8 9 and 10 (starts at 0)
+        self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_inc_or(0b100 << 8);
+
+        // enable interrupts on pin
+        self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_inc_or(0b1 << 24);
+
+//        self.raw_port_mem.pin_control_register[pin.clone() as usize].set_bit(0);
+//        self.raw_port_mem.pin_control_register[pin.clone() as usize].set_bit(1);
+//        Gpio::new(self.port_letter.clone(), pin)
+    }
+
 }
 #[repr(C)]
 pub struct PortRegisters {

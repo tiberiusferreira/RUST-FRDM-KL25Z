@@ -44,6 +44,19 @@ impl Es670Board {
         es670_board
     }
 
+    pub fn enable_low_power_timer(&self){
+        self.frdm_kl25z.enable_low_power_timer();
+    }
+
+
+    pub fn clear_lptm_interrupt(){
+        FrdmKl25zBoard::clear_lptm_interrupt();
+    }
+
+    pub fn clear_tmp0_interrupt(){
+        FrdmKl25zBoard::clear_tpm0_interrupt();
+    }
+
 
     /* ***************************************************** */
     /* Method name:        get_gpio                          */
@@ -82,6 +95,31 @@ impl Es670Board {
     /* ***************************************************** */
     pub fn delay(&self, ms: u32){
         self.frdm_kl25z.delay_ms(ms);
+    }
+
+
+    /* ***************************************************** */
+    /* Method name:        start_fan                         */
+    /* Method description: starts the fan                    */
+    /* Input params:                                         */
+    /* Output params:                                        */
+    /* ***************************************************** */
+    pub fn start_fan(&self){
+        let port_a = self.frdm_kl25z.get_port(PortLetter::PortA);
+        let pin13 = port_a.set_pin_as_gpio(Pin::Pin13);
+        pin13.set_value(Value::High);
+    }
+
+    /* ***************************************************** */
+    /* Method name:        stop_fan                          */
+    /* Method description: stops the fan                     */
+    /* Input params:                                         */
+    /* Output params:                                        */
+    /* ***************************************************** */
+    pub fn stop_fan(&self){
+        let port_a = self.frdm_kl25z.get_port(PortLetter::PortA);
+        let pin13 = port_a.set_pin_as_gpio(Pin::Pin13);
+        pin13.set_value(Value::Low);
     }
 
 

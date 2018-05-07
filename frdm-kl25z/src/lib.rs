@@ -5,7 +5,7 @@
 /*                   functionality                              */
 /* Author name:      tiberioferreira                            */
 /* Creation date:    14abr2018                                  */
-/* Revision date:    23abr2015                                  */
+/* Revision date:    23abr2018                                  */
 /* ************************************************************ */
 #![feature(used)]
 #![no_std]
@@ -17,11 +17,16 @@ extern crate cortex_m_semihosting;
 pub mod io;
 pub use io::*;
 mod multi_purpose_clock_generator;
+mod lptm_0;
 mod system_integration_module;
 mod uart_0;
 mod nvic;
+mod tpm;
+mod osc;
 
 pub use uart_0::Uart0;
+pub use tpm::Tpm0;
+pub use multi_purpose_clock_generator::MultiPurposeClockGenerator;
 pub use system_integration_module::PortLetter;
 pub use system_integration_module::PortWrapper;
 pub use system_integration_module::Gpio;
@@ -54,6 +59,32 @@ pub trait FrdmKl25z{
     /* Output params:                                        */
     /* ***************************************************** */
     fn disable_watchdog_timer(&self);
+
+    /* ***************************************************** */
+    /* Method name:        enable_low_power_timer            */
+    /* Method description: enable the low powertimer         */
+    /* Input params:                                         */
+    /* Output params:                                        */
+    /* ***************************************************** */
+    fn enable_low_power_timer(&self);
+
+
+    /* ***************************************************** */
+    /* Method name:        clear_lptm_interrupt              */
+    /* Method description: clears the current lptm interrupt */
+    /* Input params:                                         */
+    /* Output params:                                        */
+    /* ***************************************************** */
+    fn clear_lptm_interrupt();
+
+    /* ***************************************************** */
+    /* Method name:        clear_tpm0_interrupt              */
+    /* Method description: clears the current tpm0 interrupt */
+    /* Input params:                                         */
+    /* Output params:                                        */
+    /* ***************************************************** */
+    fn clear_tpm0_interrupt();
+
 
     /* ***************************************************** */
     /* Method name:        get_port                          */
@@ -100,11 +131,21 @@ impl FrdmKl25z for FrdmKl25zBoard{
     fn disable_watchdog_timer(&self){
         SystemIntegrationModule::disable_watchdog_timer();
     }
-    fn get_port(&self, port: PortLetter) -> PortWrapper{
-        SystemIntegrationModule::enable_port_for_use(port)
+    fn enable_low_power_timer(&self) {
+        lptm_0::Lptm0::init();
     }
 
 
+    fn clear_lptm_interrupt(){
+        lptm_0::Lptm0::clear_current_interrupt();
+    }
+
+    fn clear_tpm0_interrupt(){
+        tpm::Tpm0::clear_current_interrupt();
+    }
+    fn get_port(&self, port: PortLetter) -> PortWrapper{
+        SystemIntegrationModule::enable_port_for_use(port)
+    }
     fn delay_ms(&self, mut millis: u32) {
         while millis > 0 {
             self.delay_1ms();

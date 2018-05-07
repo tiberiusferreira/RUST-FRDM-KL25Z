@@ -4,7 +4,7 @@
 /*                   implements the system_integration_module   */
 /* Author name:      tiberioferreira                            */
 /* Creation date:    14abr2018                                  */
-/* Revision date:    23abr2015                                  */
+/* Revision date:    23abr2018                                  */
 /* ************************************************************ */
 use io::VolatileRW;
 mod port;
@@ -69,8 +69,33 @@ impl SystemIntegrationModule {
     }
 
 
+
+    pub (crate) fn enable_tpm0_clock() {
+        ::osc::Osc::init();
+        Self::get().system_clock_gating_control_register_6.set_bit(24);
+    }
+
+    pub (crate) fn select_tpm0_clock_as_oscerclk() {
+        Self::get().system_option_register_2.set_bit(25);
+        Self::get().system_option_register_2.clear_bit(24);
+    }
+
+    pub (crate) fn select_tpm0_clock_as_mcgfllclk() {
+        Self::get().system_option_register_2.set_bit(24);
+        Self::get().system_option_register_2.clear_bit(25);
+    }
+
+
+    pub (crate) fn set_tpm0_clock_to_clkin0() {
+        Self::get().system_option_register_4.clear_bit(24);
+    }
+
+    pub fn enable_software_control_of_lptm(){
+        Self::get().system_clock_gating_control_register_5.set_bit(0);
+    }
+
     pub fn disable_watchdog_timer(){
-        Self::get().cop_control_register.set(00 << 2);
+        Self::get().cop_control_register.bitwise_and(!(0b11 << 2));
 
     }
     pub fn enable_port_for_use(port: PortLetter) -> PortWrapper{
@@ -82,6 +107,8 @@ impl SystemIntegrationModule {
             .set_bit(9 + (port.clone() as u8));
         PortWrapper::new(port)
     }
+
+
 
 
 

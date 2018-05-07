@@ -4,7 +4,7 @@
 /*                   implements the uart functionality          */
 /* Author name:      tiberioferreira                            */
 /* Creation date:    14abr2018                                  */
-/* Revision date:    23abr2015                                  */
+/* Revision date:    23abr2018                                  */
 /* ************************************************************ */
 
 use io::VolatileRW;

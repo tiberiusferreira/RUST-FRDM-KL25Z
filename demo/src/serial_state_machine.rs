@@ -1,13 +1,4 @@
-/* ********************************************** */
-/* File name:        serial_state_machine.rs      */
-/* File description: This file implements the     */
-/*                   state machine used to        */
-/*                   control the board using      */
-/*                   communication                */
-/* Author name:      tiberioferreira              */
-/* Creation date:    14abr2018                    */
-/* Revision date:    23abr2015                    */
-/* ********************************************** */
+zz
 extern crate es670_board;
 extern crate cortex_m;
 extern crate cortex_m_rt;

@@ -143,12 +143,12 @@ impl Es670Board{
 
 
     /* ***************************************************** */
-    /* Method name:        write_string                      */
+    /* Method name:        write_string_to_lcd               */
     /* Method description: writes a string to the LCD        */
     /* Input params:       string: the string to be written  */
     /* Output params:                                        */
     /* ***************************************************** */
-    pub fn write_string(&self, string: &str){
+    pub fn write_string_to_lcd(&self, string: &str){
         for c in string.chars(){
             self.write_to_lcd(c as u8, false);
         }
@@ -183,7 +183,7 @@ impl Es670Board{
         lcd.db5.set_value(Self::get_bit_at(data, BitPositionsU8::Bit5).into());
         lcd.db6.set_value(Self::get_bit_at(data, BitPositionsU8::Bit6).into());
         lcd.db7.set_value(Self::get_bit_at(data, BitPositionsU8::Bit7).into());
-
+        // generates a pulse to enable the display
         lcd.enable.set_value(High);
         self.delay(1);
         lcd.enable.set_value(Low);

@@ -5,7 +5,7 @@
 /*                   registers                                  */
 /* Author name:      tiberioferreira                            */
 /* Creation date:    14abr2018                                  */
-/* Revision date:    23abr2015                                  */
+/* Revision date:    23abr2018                                  */
 /* ************************************************************ */
 
 
@@ -13,7 +13,7 @@ use core::intrinsics::{volatile_load, volatile_store};
 use core::cell::UnsafeCell;
 
 pub struct VolatileRW<T> {
-    value: UnsafeCell<T>,
+    pub value: UnsafeCell<T>,
 }
 
 impl<T> VolatileRW<T> {
