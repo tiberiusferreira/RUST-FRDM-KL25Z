@@ -126,7 +126,10 @@ impl FrdmKl25zBoard {
 impl FrdmKl25z for FrdmKl25zBoard{
 
     fn new() -> FrdmKl25zBoard{
-        FrdmKl25zBoard{}
+        Self::delay_ms(300);
+        FrdmKl25zBoard{
+
+        }
     }
     fn disable_watchdog_timer(&self){
         SystemIntegrationModule::disable_watchdog_timer();
