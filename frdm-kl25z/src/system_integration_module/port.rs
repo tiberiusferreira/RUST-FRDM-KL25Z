@@ -83,6 +83,18 @@ impl PortWrapper{
     }
 
     /* ***************************************************** */
+    /* Method name:        set_pin_as_disabled               */
+    /* Method description: sets the given pin to disabled    */
+    /* Input params:       pin: the pin to configure as      */
+    /*                                               disabled */
+    /* Output params:                                        */
+    /* ***************************************************** */
+    pub fn set_pin_as_disabled(&self, pin: Pin) {
+        // Clear all bits
+        self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_and(!(0b111 << 8));
+    }
+
+    /* ***************************************************** */
     /* Method name:        set_pin_as_alt2                   */
     /* Method description: sets the given pin to function    */
     /*                     alt2                              */

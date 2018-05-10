@@ -23,6 +23,7 @@ mod uart_0;
 mod nvic;
 mod tpm;
 mod osc;
+mod smc;
 
 pub use uart_0::Uart0;
 pub use tpm::Tpm0;
@@ -126,10 +127,11 @@ impl FrdmKl25zBoard {
 impl FrdmKl25z for FrdmKl25zBoard{
 
     fn new() -> FrdmKl25zBoard{
-        Self::delay_ms(300);
-        FrdmKl25zBoard{
+        let kl25z = FrdmKl25zBoard{
 
-        }
+        };
+        kl25z.delay_ms(500);
+        kl25z
     }
     fn disable_watchdog_timer(&self){
         SystemIntegrationModule::disable_watchdog_timer();

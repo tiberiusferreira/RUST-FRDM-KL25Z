@@ -46,8 +46,8 @@ impl Tpm0 {
         let port_a = SystemIntegrationModule::enable_port_for_use(PortLetter::PortA);
 
         ::system_integration_module::SystemIntegrationModule::enable_tpm0_clock();
-        ::system_integration_module::SystemIntegrationModule::select_tpm0_clock_as_mcgfllclk();
-//        ::system_integration_module::SystemIntegrationModule::select_tpm0_clock_as_oscerclk();
+//        ::system_integration_module::SystemIntegrationModule::select_tpm0_clock_as_mcgfllclk();
+        ::system_integration_module::SystemIntegrationModule::select_tpm0_clock_as_oscerclk();
         ::system_integration_module::SystemIntegrationModule::set_tpm0_clock_to_clkin0();
 
 
@@ -62,7 +62,7 @@ impl Tpm0 {
         Self::get().channel_0_status_and_control.clear_bit(2);
 
         // Clear the Counter
-        Self::get().counter.set(0);
+//        Self::get().counter.set(0);
 
         // Set mod to 1
         Self::get().modulo.set(1);
@@ -76,10 +76,10 @@ impl Tpm0 {
         Self::get().status_and_control.clear_bit(2);
 
         // Overflow interrupt
-//        Self::get().status_and_control.set_bit(6);
+        Self::get().status_and_control.set_bit(6);
 
         // Clear the Counter
-        Self::get().counter.set(0);
+//        Self::get().counter.set(0);
 
 
 
@@ -87,6 +87,10 @@ impl Tpm0 {
         // Enable interrupts on channel 0
         Self::get().channel_0_status_and_control.set_bit(6);
         ::nvic::Nvic::enable_tpm0_interrupt();
+
+        // Set LPTPM to count on every clock syncronized with external_clock
+        Self::get().status_and_control.set_bit(4);
+        Self::get().status_and_control.clear_bit(3);
 
         // Set as software compare
         Self::get().channel_0_status_and_control.set_bit(5);
@@ -96,20 +100,19 @@ impl Tpm0 {
 
 
         // Clear the Counter
-        Self::get().counter.set(0);
+//        Self::get().counter.set(0);
 
-        // Set LPTPM to count on every clock syncronized with external_clock
-        Self::get().status_and_control.set_bit(4);
-        Self::get().status_and_control.clear_bit(3);
+
 
         // Clear the Counter
-        Self::get().counter.set(0);
+//        Self::get().counter.set(0);
     }
 
     pub fn clear_current_interrupt(){
-//        Self::get().counter.set(0);
-        Self::get().channel_0_status_and_control.set_bit(7);
-//        Self::get().status_and_control.set_bit(7);
+        while Self::get().channel_0_status_and_control.get_bit(7){
+            Self::get().channel_0_status_and_control.set_bit(7);
+        }
+        Self::get().status_and_control.set_bit(7);
     }
 
     pub fn get_counter() -> u32{

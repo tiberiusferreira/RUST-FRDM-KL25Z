@@ -98,6 +98,7 @@ impl SystemIntegrationModule {
         Self::get().cop_control_register.bitwise_and(!(0b11 << 2));
 
     }
+
     pub fn enable_port_for_use(port: PortLetter) -> PortWrapper{
         // Enabling clock on Port
         // For port A set bit 9 (starting from 0) to 1

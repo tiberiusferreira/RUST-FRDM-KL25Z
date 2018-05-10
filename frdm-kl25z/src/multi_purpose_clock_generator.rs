@@ -1,4 +1,5 @@
 use io::VolatileRW;
+use system_integration_module::*;
 const BASE_MULTI_PURPOSE_CLOCK_GENERATOR: u32 = 0x4006_4000;
 
 #[repr(C)]
@@ -49,6 +50,16 @@ impl MultiPurposeClockGenerator {
 //        Self::get().status_register.clear_bit(2);
 //        Self::get().status_register.set_bit(3);
 
+    }
+
+    pub fn mcg_clock_init() {
+        let port_a = SystemIntegrationModule::enable_port_for_use(PortLetter::PortA);
+        SystemIntegrationModule::enable_port_for_use(PortLetter::PortC);
+        SystemIntegrationModule::enable_port_for_use(PortLetter::PortE);
+
+        ::smc::Smc::enable_all_modes();
+        port_a.set_pin_as_disabled(Pin::Pin18);
+        port_a.set_pin_as_disabled(Pin::Pin19);
     }
 
     pub fn osc_is_ok() -> bool{

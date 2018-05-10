@@ -69,52 +69,92 @@ fn main() {
 
     let board  = Es670Board::new();
     Tpm0::init();
+    Uart0::enable_uart(115200);
+    Uart0::send_string("Ok!");
+    let mut was_on = false;
 
-    let mut was_on = true;
-
-    board.turn_on_led(Led::BLUE);
-    board.delay(2000);
-    board.turn_off_led(Led::BLUE);
-    board.lcd_clear();
+//    board.turn_on_led(Led::BLUE);
+//    board.delay(2000);
+//    board.turn_off_led(Led::BLUE);
+//    board.lcd_clear();
     board.enable_low_power_timer(); // has 1hz frequency
 //    board.start_fan();
     // expect 5000 rpm = 83,333333333 rps
-    loop{
+    let mut was_on = false;
+    loop {
+
+        unsafe {
+            while !PERIOD_ELAPSED.get() {
+
+            }
+            board.turn_on_led(Led::BLUE);
+            board.delay(200);
+            board.turn_off_led(Led::BLUE);
+            PERIOD_ELAPSED.set(false);
+            let counted_so_far = NUMBER_COUNTS_1_SEC.get();
+            for c in u32_to_str(counted_so_far).iter(){
+                Uart0::send_char(*c);
+            }
+            Uart0::send_char('\n');
+//            board.write_string_to_lcd(" RPM");
+//            NUMBER_COUNTS_1_SEC.set(0);
+        }
+
+//        board.turn_on_led(Led::BLUE);
+//        board.delay(100);
+//
+//        board.turn_off_led(Led::RED);
+//        board.turn_off_led(Led::BLUE);
+//        board.turn_off_led(Led::GREEN);
+////        board.turn_on_led(Led::RED);
+//        if Tpm0::get_counter() == 0{
+//            board.turn_on_led(Led::RED);
+//        }else if Tpm0::get_counter() == 1 {
+//            board.turn_on_led(Led::BLUE);
+//        }else{
+//            board.turn_on_led(Led::GREEN);
+//        }
+//
+//        if was_on {
+//            board.turn_off_led(Led::BLUE);
+//            was_on = false;
+//        } else {
+//            board.turn_on_led(Led::BLUE);
+//            was_on = true;
+//        }
+//        board.delay(2000);
+//        board.turn_off_led(Led::BLUE);
+//        board.delay(2000);
 //        if MultiPurposeClockGenerator::osc_is_ok() {
 //            board.turn_on_led(Led::RED);
 //            board.delay(1000);
 //            board.turn_off_led(Led::RED);
 //            Tpm0::clear_tof();
 //        }
-        unsafe {
-            while !PERIOD_ELAPSED.get() {
 
-            }
-            PERIOD_ELAPSED.set(false);
-            board.lcd_clear();
-            let counted_so_far = NUMBER_COUNTS_1_SEC.get()/7;
-            for c in u32_to_str(counted_so_far).iter(){
-                board.write_char(*c);
-            }
-            board.write_string_to_lcd(" RPS");
-            board.lcd_set_cursor(1, 0);
-            let counted_so_far_rpm = counted_so_far*60;
-            for c in u32_to_str(counted_so_far_rpm).iter(){
-                board.write_char(*c);
-            }
-            board.write_string_to_lcd(" RPM");
-            NUMBER_COUNTS_1_SEC.set(0);
 
-//            board.write_string_to_lcd(count_as_str);
-//            if was_on{
-//                board.turn_off_led(Led::BLUE);
-//                was_on = false;
-//            }else{
-//                board.turn_on_led(Led::BLUE);
-//                was_on = true;
+
+//        unsafe {
+//            while !PERIOD_ELAPSED.get() {
+//
 //            }
-        }
+//            PERIOD_ELAPSED.set(false);
+//            board.lcd_clear();
+//            let counted_so_far = NUMBER_COUNTS_1_SEC.get()/7;
+//            for c in u32_to_str(counted_so_far).iter(){
+//                board.write_char(*c);
+//            }
+//            board.write_string_to_lcd(" RPS");
+//            board.lcd_set_cursor(1, 0);
+//            let counted_so_far_rpm = counted_so_far*60;
+//            for c in u32_to_str(counted_so_far_rpm).iter(){
+//                board.write_char(*c);
+//            }
+//            board.write_string_to_lcd(" RPM");
+//            NUMBER_COUNTS_1_SEC.set(0);
+//        }
     }
+
 }
 
 
