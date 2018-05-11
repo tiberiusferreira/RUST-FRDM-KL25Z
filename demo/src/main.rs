@@ -29,9 +29,6 @@ static mut PERIOD_ELAPSED: VolatileRW<bool> = es670_board::VolatileRW{
     value: UnsafeCell::new(false)
 };
 
-static mut NUMBER_COUNTS_1_SEC: VolatileRW<u32> = es670_board::VolatileRW{
-    value: UnsafeCell::new(0)
-};
 
 fn digit_to_char(u_int: u32) -> char{
     let u_int = u_int%10;
@@ -51,108 +48,44 @@ fn digit_to_char(u_int: u32) -> char{
 }
 
 fn u32_to_str(u_int: u32) -> [char; 4]{
-    let copy = u_int;
+    let mut copy = u_int;
     let first_digit = digit_to_char(copy%10);
-    let copy = copy/10;
+    copy = copy/10;
     let second_digit = digit_to_char(copy%10);
-    let copy = copy/10;
+    copy = copy/10;
     let third_digit = digit_to_char(copy%10);
-    let copy = copy/10;
+    copy = copy/10;
     let forth_digit = digit_to_char(copy%10);
-    let copy = copy/10;
     [forth_digit, third_digit, second_digit, first_digit]
-//    let string = format!("{}{}{}{}",forth_digit, third_digit, second_digit, first_digit);
-//    string.as_str()
 }
 
 fn main() {
-
     let board  = Es670Board::new();
     Tpm0::init();
-    Uart0::enable_uart(115200);
-    Uart0::send_string("Ok!");
-    let mut was_on = false;
-
-//    board.turn_on_led(Led::BLUE);
-//    board.delay(2000);
-//    board.turn_off_led(Led::BLUE);
-//    board.lcd_clear();
     board.enable_low_power_timer(); // has 1hz frequency
-//    board.start_fan();
+    board.start_fan();
     // expect 5000 rpm = 83,333333333 rps
-    let mut was_on = false;
     loop {
 
         unsafe {
             while !PERIOD_ELAPSED.get() {
 
             }
-            board.turn_on_led(Led::BLUE);
-            board.delay(200);
-            board.turn_off_led(Led::BLUE);
             PERIOD_ELAPSED.set(false);
-            let counted_so_far = NUMBER_COUNTS_1_SEC.get();
+            board.lcd_clear();
+            let counted_so_far = board.tachometer_counter_get_current_value();
             for c in u32_to_str(counted_so_far).iter(){
-                Uart0::send_char(*c);
+                board.write_char(*c);
             }
-            Uart0::send_char('\n');
-//            board.write_string_to_lcd(" RPM");
-//            NUMBER_COUNTS_1_SEC.set(0);
+            board.write_string_to_lcd(" RPS");
+            board.lcd_set_cursor(1, 0);
+            let counted_so_far_rpm = counted_so_far*60;
+            for c in u32_to_str(counted_so_far_rpm).iter(){
+                board.write_char(*c);
+            }
+            board.write_string_to_lcd(" RPM");
+            board.tachometer_counter_reset();
         }
-
-//        board.turn_on_led(Led::BLUE);
-//        board.delay(100);
-//
-//        board.turn_off_led(Led::RED);
-//        board.turn_off_led(Led::BLUE);
-//        board.turn_off_led(Led::GREEN);
-////        board.turn_on_led(Led::RED);
-//        if Tpm0::get_counter() == 0{
-//            board.turn_on_led(Led::RED);
-//        }else if Tpm0::get_counter() == 1 {
-//            board.turn_on_led(Led::BLUE);
-//        }else{
-//            board.turn_on_led(Led::GREEN);
-//        }
-//
-//        if was_on {
-//            board.turn_off_led(Led::BLUE);
-//            was_on = false;
-//        } else {
-//            board.turn_on_led(Led::BLUE);
-//            was_on = true;
-//        }
-//        board.delay(2000);
-//        board.turn_off_led(Led::BLUE);
-//        board.delay(2000);
-//        if MultiPurposeClockGenerator::osc_is_ok() {
-//            board.turn_on_led(Led::RED);
-//            board.delay(1000);
-//            board.turn_off_led(Led::RED);
-//            Tpm0::clear_tof();
-//        }
-
-
-
-//        unsafe {
-//            while !PERIOD_ELAPSED.get() {
-//
-//            }
-//            PERIOD_ELAPSED.set(false);
-//            board.lcd_clear();
-//            let counted_so_far = NUMBER_COUNTS_1_SEC.get()/7;
-//            for c in u32_to_str(counted_so_far).iter(){
-//                board.write_char(*c);
-//            }
-//            board.write_string_to_lcd(" RPS");
-//            board.lcd_set_cursor(1, 0);
-//            let counted_so_far_rpm = counted_so_far*60;
-//            for c in u32_to_str(counted_so_far_rpm).iter(){
-//                board.write_char(*c);
-//            }
-//            board.write_string_to_lcd(" RPM");
-//            NUMBER_COUNTS_1_SEC.set(0);
-//        }
     }
 
 }
@@ -223,14 +156,13 @@ pub extern "C" fn lptm_irq_handler() {
 
 
 pub extern "C" fn tpm0_irq_handler() {
-    unsafe {
-        NUMBER_COUNTS_1_SEC.set(NUMBER_COUNTS_1_SEC.get() + 1);
-//        PERIOD_ELAPSED.set(true);
-    }
     Es670Board::clear_tmp0_interrupt();
 }
 
 // problemas: não saber que tinha que dar "clear na interrupção"
 // problemas: não saber que tinha que habilitar modificações no lptm no sim
 // problemas: o watchdog timer não pode ter dois bits escritos em operações sequenciais
+// problemas: a placa se tornou inutilizavel após configuração errada do clock no MCG
+// problemas: tpm0 gerando interrupções duplicadas ou não gerando elas quando em modo contador com mod 1
+// problemas: tpm0 não contendo debouncing por padrão
 

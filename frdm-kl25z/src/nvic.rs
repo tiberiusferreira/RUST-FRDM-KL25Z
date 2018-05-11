@@ -42,6 +42,7 @@ impl Nvic {
         Self::get().interrupt_set_enable_register.set_bit(28);
     }
 
+    #[allow(unused)]
     pub (crate) fn enable_tpm0_interrupt(){
         Self::get().interrupt_clear_pending_register.set_bit(17);
         Self::get().interrupt_set_enable_register.set_bit(17);

@@ -29,28 +29,6 @@ impl MultiPurposeClockGenerator {
         }
     }
 
-    pub (crate) fn enable_internal_reference_clock(){
-        Self::get().control_register_1.set_bit(1);
-//        Self::get().control_register_1.clear_bit(2);
-    }
-
-
-    pub (crate) fn use_osc_as_external_ref_clock(){
-
-        // Select Oscillator as external reference
-        Self::get().control_register_2.set_bit(2);
-        // Configure oscillator as high gain
-        Self::get().control_register_2.set_bit(3);
-
-        // Configure oscillator as high frequency
-        Self::get().control_register_2.clear_bit(5);
-        Self::get().control_register_2.set_bit(4);
-
-        // Do I need it?
-//        Self::get().status_register.clear_bit(2);
-//        Self::get().status_register.set_bit(3);
-
-    }
 
     pub fn mcg_clock_init() {
         let port_a = SystemIntegrationModule::enable_port_for_use(PortLetter::PortA);
@@ -66,9 +44,5 @@ impl MultiPurposeClockGenerator {
         Self::get().status_register.get_bit(1)
     }
 
-    pub (crate) fn enable_fast_internal_clock() {
-        // Select 4Mhz clock
-        Self::get().control_register_2.set_bit(0);
-    }
 
 }

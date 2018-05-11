@@ -80,11 +80,6 @@ impl SystemIntegrationModule {
         Self::get().system_option_register_2.clear_bit(24);
     }
 
-    pub (crate) fn select_tpm0_clock_as_mcgfllclk() {
-        Self::get().system_option_register_2.set_bit(24);
-        Self::get().system_option_register_2.clear_bit(25);
-    }
-
 
     pub (crate) fn set_tpm0_clock_to_clkin0() {
         Self::get().system_option_register_4.clear_bit(24);

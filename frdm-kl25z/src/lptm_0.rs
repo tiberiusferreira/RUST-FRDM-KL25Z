@@ -8,7 +8,6 @@
 /* ************************************************************ */
 use io::VolatileRW;
 use io::VolatileR;
-use ::multi_purpose_clock_generator::MultiPurposeClockGenerator;
 const LPTM_0_BASE : u32 = 0x4004_0000;
 
 

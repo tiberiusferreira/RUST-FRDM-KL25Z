@@ -86,6 +86,31 @@ pub trait FrdmKl25z{
     /* ***************************************************** */
     fn clear_tpm0_interrupt();
 
+    /* ***************************************************** */
+    /* Method name:        init_tpm0_ch0_as_software_counter */
+    /* Method description: initializes tmp0 as software      */
+    /* counter without interrupts                            */
+    /* Input params:                                         */
+    /* Output params:                                        */
+    /* ***************************************************** */
+    fn init_tpm0_ch0_as_software_counter();
+
+    /* ***************************************************** */
+    /* Method name:         tmp0_ch0_reset_counter           */
+    /* Method description:resets tpm0 channel 0 counter value*/
+    /* Input params:                                         */
+    /* Output params:                                        */
+    /* ***************************************************** */
+    fn tmp0_ch0_reset_counter();
+
+    /* ***************************************************** */
+    /* Method name:        tmp0_ch0_get_current_value        */
+    /* Method description: returns tmp0 current counter value*/
+    /* Input params:                                         */
+    /* Output params: the counter value as u32               */
+    /* ***************************************************** */
+    fn tmp0_ch0_get_current_value() -> u32;
+
 
     /* ***************************************************** */
     /* Method name:        get_port                          */
@@ -148,6 +173,19 @@ impl FrdmKl25z for FrdmKl25zBoard{
     fn clear_tpm0_interrupt(){
         tpm::Tpm0::clear_current_interrupt();
     }
+
+    fn init_tpm0_ch0_as_software_counter() {
+        tpm::Tpm0::init();
+    }
+
+    fn tmp0_ch0_reset_counter() {
+        tpm::Tpm0::clear_counter();
+    }
+
+    fn tmp0_ch0_get_current_value() -> u32 {
+        tpm::Tpm0::get_counter()
+    }
+
     fn get_port(&self, port: PortLetter) -> PortWrapper{
         SystemIntegrationModule::enable_port_for_use(port)
     }
