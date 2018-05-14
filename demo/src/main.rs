@@ -74,13 +74,13 @@ fn main() {
             PERIOD_ELAPSED.set(false);
             board.lcd_clear();
             let counted_so_far = board.tachometer_counter_get_current_value();
-            for c in u32_to_str(counted_so_far).iter(){
+            for c in u32_to_str(counted_so_far as u32).iter(){
                 board.write_char(*c);
             }
             board.write_string_to_lcd(" RPS");
             board.lcd_set_cursor(1, 0);
             let counted_so_far_rpm = counted_so_far*60;
-            for c in u32_to_str(counted_so_far_rpm).iter(){
+            for c in u32_to_str(counted_so_far_rpm as u32).iter(){
                 board.write_char(*c);
             }
             board.write_string_to_lcd(" RPM");
@@ -159,10 +159,12 @@ pub extern "C" fn tpm0_irq_handler() {
     Es670Board::clear_tmp0_interrupt();
 }
 
+
 // problemas: não saber que tinha que dar "clear na interrupção"
 // problemas: não saber que tinha que habilitar modificações no lptm no sim
 // problemas: o watchdog timer não pode ter dois bits escritos em operações sequenciais
 // problemas: a placa se tornou inutilizavel após configuração errada do clock no MCG
 // problemas: tpm0 gerando interrupções duplicadas ou não gerando elas quando em modo contador com mod 1
 // problemas: tpm0 não contendo debouncing por padrão
+
 

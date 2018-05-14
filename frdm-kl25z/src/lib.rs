@@ -88,13 +88,13 @@ pub trait FrdmKl25z{
     fn clear_tpm0_interrupt();
 
     /* ***************************************************** */
-    /* Method name:        init_tpm0_ch0_as_software_counter */
-    /* Method description: initializes tmp0 as software      */
+    /* Method name:        init_tpm0_ch0_as_hardware_counter */
+    /* Method description: initializes tmp0 as hardware      */
     /* counter without interrupts                            */
     /* Input params:                                         */
     /* Output params:                                        */
     /* ***************************************************** */
-    fn init_tpm0_ch0_as_software_counter(&self);
+    fn init_tpm0_ch0_as_hardware_counter(&self);
 
     /* ***************************************************** */
     /* Method name:         tmp0_ch0_reset_counter           */
@@ -110,7 +110,7 @@ pub trait FrdmKl25z{
     /* Input params:                                         */
     /* Output params: the counter value as u32               */
     /* ***************************************************** */
-    fn tmp0_ch0_get_current_value(&self) -> u32;
+    fn tmp0_ch0_get_current_value(&self) -> u16;
 
 
     /* ***************************************************** */
@@ -175,7 +175,7 @@ impl FrdmKl25z for FrdmKl25zBoard{
         tpm::Tpm0::clear_current_interrupt();
     }
 
-    fn init_tpm0_ch0_as_software_counter(&self) {
+    fn init_tpm0_ch0_as_hardware_counter(&self) {
         tpm::Tpm0::init_using_clkin0_as_software_counter();
     }
 
@@ -183,8 +183,8 @@ impl FrdmKl25z for FrdmKl25zBoard{
         tpm::Tpm0::clear_counter();
     }
 
-    fn tmp0_ch0_get_current_value(&self) -> u32 {
-        tpm::Tpm0::get_counter()
+    fn tmp0_ch0_get_current_value(&self) -> u16 {
+        tpm::Tpm0::get_counter() as u16
     }
 
     fn get_port(&self, port: PortLetter) -> PortWrapper{
