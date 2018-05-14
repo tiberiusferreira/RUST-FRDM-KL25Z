@@ -61,8 +61,8 @@ fn u32_to_str(u_int: u32) -> [char; 4]{
 
 fn main() {
     let board  = Es670Board::new();
-    Tpm0::init();
-    board.enable_low_power_timer(); // has 1hz frequency
+    board.tachometer_start_counter();
+    board.enable_low_power_timer_1hz(); // has 1hz frequency
     board.start_fan();
     // expect 5000 rpm = 83,333333333 rps
     loop {

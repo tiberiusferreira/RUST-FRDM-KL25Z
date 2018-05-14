@@ -25,7 +25,7 @@ impl Osc {
     }
 
     pub fn init(){
-        ::multi_purpose_clock_generator::MultiPurposeClockGenerator::mcg_clock_init();
+        MultiPurposeClockGenerator::mcg_clock_init();
         // Enable OSCERCLK
         Self::get().control_register.set_bit(5);
         Self::get().control_register.set_bit(7);

@@ -27,7 +27,8 @@ impl Lptm0 {
         }
     }
 
-    pub fn init(){
+    ///TODO: make it take the period as input
+    pub fn init_1hz(){
         ::system_integration_module::SystemIntegrationModule::enable_software_control_of_lptm();
 
         // Disables the LPTM

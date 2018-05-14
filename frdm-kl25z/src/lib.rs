@@ -62,12 +62,13 @@ pub trait FrdmKl25z{
     fn disable_watchdog_timer(&self);
 
     /* ***************************************************** */
-    /* Method name:        enable_low_power_timer            */
-    /* Method description: enable the low powertimer         */
+    /* Method name:        enable_low_power_timer_1hz        */
+    /* Method description: enable the low powertimer with    */
+    /*                     1hz frequency                     */
     /* Input params:                                         */
     /* Output params:                                        */
     /* ***************************************************** */
-    fn enable_low_power_timer(&self);
+    fn enable_low_power_timer_1hz(&self);
 
 
     /* ***************************************************** */
@@ -93,7 +94,7 @@ pub trait FrdmKl25z{
     /* Input params:                                         */
     /* Output params:                                        */
     /* ***************************************************** */
-    fn init_tpm0_ch0_as_software_counter();
+    fn init_tpm0_ch0_as_software_counter(&self);
 
     /* ***************************************************** */
     /* Method name:         tmp0_ch0_reset_counter           */
@@ -101,7 +102,7 @@ pub trait FrdmKl25z{
     /* Input params:                                         */
     /* Output params:                                        */
     /* ***************************************************** */
-    fn tmp0_ch0_reset_counter();
+    fn tmp0_ch0_reset_counter(&self);
 
     /* ***************************************************** */
     /* Method name:        tmp0_ch0_get_current_value        */
@@ -109,7 +110,7 @@ pub trait FrdmKl25z{
     /* Input params:                                         */
     /* Output params: the counter value as u32               */
     /* ***************************************************** */
-    fn tmp0_ch0_get_current_value() -> u32;
+    fn tmp0_ch0_get_current_value(&self) -> u32;
 
 
     /* ***************************************************** */
@@ -161,8 +162,8 @@ impl FrdmKl25z for FrdmKl25zBoard{
     fn disable_watchdog_timer(&self){
         SystemIntegrationModule::disable_watchdog_timer();
     }
-    fn enable_low_power_timer(&self) {
-        lptm_0::Lptm0::init();
+    fn enable_low_power_timer_1hz(&self) {
+        lptm_0::Lptm0::init_1hz();
     }
 
 
@@ -174,15 +175,15 @@ impl FrdmKl25z for FrdmKl25zBoard{
         tpm::Tpm0::clear_current_interrupt();
     }
 
-    fn init_tpm0_ch0_as_software_counter() {
-        tpm::Tpm0::init();
+    fn init_tpm0_ch0_as_software_counter(&self) {
+        tpm::Tpm0::init_using_clkin0_as_software_counter();
     }
 
-    fn tmp0_ch0_reset_counter() {
+    fn tmp0_ch0_reset_counter(&self) {
         tpm::Tpm0::clear_counter();
     }
 
-    fn tmp0_ch0_get_current_value() -> u32 {
+    fn tmp0_ch0_get_current_value(&self) -> u32 {
         tpm::Tpm0::get_counter()
     }
 

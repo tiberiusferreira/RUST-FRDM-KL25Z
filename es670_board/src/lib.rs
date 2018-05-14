@@ -15,6 +15,8 @@ mod led;
 mod display;
 mod switch;
 mod lcd;
+mod fan;
+mod tachometer;
 pub use switch::*;
 pub use led::*;
 pub use display::*;
@@ -44,8 +46,8 @@ impl Es670Board {
         es670_board
     }
 
-    pub fn enable_low_power_timer(&self){
-        self.frdm_kl25z.enable_low_power_timer();
+    pub fn enable_low_power_timer_1hz(&self){
+        self.frdm_kl25z.enable_low_power_timer_1hz();
     }
 
 
@@ -98,62 +100,8 @@ impl Es670Board {
     }
 
 
-    /* ***************************************************** */
-    /* Method name:        start_fan                         */
-    /* Method description: starts the fan                    */
-    /* Input params:                                         */
-    /* Output params:                                        */
-    /* ***************************************************** */
-    pub fn start_fan(&self){
-        let port_a = self.frdm_kl25z.get_port(PortLetter::PortA);
-        let pin13 = port_a.set_pin_as_gpio(Pin::Pin13);
-        pin13.set_value(Value::High);
-    }
-
-    /* ***************************************************** */
-    /* Method name:             tachometer_start_counter     */
-    /* Method description:      starts tachometer counter    */
-    /* Input params:                                         */
-    /* Output params:                                        */
-    /* ***************************************************** */
-    pub fn tachometer_start_counter(&self){
-        FrdmKl25zBoard::init_tpm0_ch0_as_software_counter();
-    }
 
 
-    /* ***************************************************** */
-    /* Method name:     tachometer_counter_get_current_value */
-    /* Method description: gets the tachometer counter value */
-    /*                     current value                     */
-    /* Input params:                                         */
-    /* Output params:                                        */
-    /* ***************************************************** */
-    pub fn tachometer_counter_get_current_value(&self) -> u32{
-        FrdmKl25zBoard::tmp0_ch0_get_current_value()/7
-    }
-
-    /* ***************************************************** */
-    /* Method name:     tachometer_counter_reset             */
-    /* Method description: resets the tachometer counter     */
-    /*                     current value                     */
-    /* Input params:                                         */
-    /* Output params:                                        */
-    /* ***************************************************** */
-    pub fn tachometer_counter_reset(&self){
-        FrdmKl25zBoard::tmp0_ch0_reset_counter();
-    }
-
-    /* ***************************************************** */
-    /* Method name:        stop_fan                          */
-    /* Method description: stops the fan                     */
-    /* Input params:                                         */
-    /* Output params:                                        */
-    /* ***************************************************** */
-    pub fn stop_fan(&self){
-        let port_a = self.frdm_kl25z.get_port(PortLetter::PortA);
-        let pin13 = port_a.set_pin_as_gpio(Pin::Pin13);
-        pin13.set_value(Value::Low);
-    }
 
 
     /* ***************************************************** */

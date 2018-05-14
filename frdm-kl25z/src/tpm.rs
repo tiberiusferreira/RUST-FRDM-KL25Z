@@ -38,16 +38,16 @@ impl Tpm0 {
         }
     }
 
-    pub fn init(){
+    pub fn init_using_clkin0_as_software_counter(){
         // PortE Pin29 is used as CLKIN0
         let port_e = SystemIntegrationModule::enable_port_for_use(PortLetter::PortE);
         port_e.set_pin_as_alt4(Pin::Pin29);
         // Port A is where the external 8 MHz clock is connected
         let _port_a = SystemIntegrationModule::enable_port_for_use(PortLetter::PortA);
 
-        ::system_integration_module::SystemIntegrationModule::enable_tpm0_clock();
-        ::system_integration_module::SystemIntegrationModule::select_tpm0_clock_as_oscerclk();
-        ::system_integration_module::SystemIntegrationModule::set_tpm0_clock_to_clkin0();
+        SystemIntegrationModule::enable_tpm0_clock();
+        SystemIntegrationModule::select_tpm0_clock_as_oscerclk();
+        SystemIntegrationModule::set_tpm0_clock_to_clkin0();
 
 
         // Prescale 1:1
