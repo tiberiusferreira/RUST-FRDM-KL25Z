@@ -8,6 +8,7 @@
 /* ************************************************************ */
 use io::VolatileRW;
 use multi_purpose_clock_generator::MultiPurposeClockGenerator;
+use system_integration_module::{SystemIntegrationModule, PortLetter};
 const OSC_BASE : u32 = 0x4006_5000;
 
 
@@ -25,6 +26,8 @@ impl Osc {
     }
 
     pub fn init(){
+        // Port A is where the external 8 MHz clock is connected
+        let _port_a = SystemIntegrationModule::enable_port_for_use(PortLetter::PortA);
         MultiPurposeClockGenerator::mcg_clock_init();
         // Enable OSCERCLK
         Self::get().control_register.set_bit(5);

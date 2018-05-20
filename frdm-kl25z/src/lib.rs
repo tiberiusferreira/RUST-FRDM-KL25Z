@@ -26,7 +26,7 @@ mod osc;
 mod smc;
 
 pub use uart_0::Uart0;
-pub use tpm::Tpm0;
+pub use tpm::{Tpm, TpmNumber, TpmChannel};
 pub use multi_purpose_clock_generator::MultiPurposeClockGenerator;
 pub use system_integration_module::PortLetter;
 pub use system_integration_module::PortWrapper;
@@ -172,19 +172,19 @@ impl FrdmKl25z for FrdmKl25zBoard{
     }
 
     fn clear_tpm0_interrupt(){
-        tpm::Tpm0::clear_current_interrupt();
+        tpm::Tpm::clear_current_interrupt(TpmNumber::ZERO);
     }
 
     fn init_tpm0_ch0_as_hardware_counter(&self) {
-        tpm::Tpm0::init_using_clkin0_as_software_counter();
+        tpm::Tpm::init_tpm_0_ch_0_using_clkin0_as_hardware_counter();
     }
 
     fn tmp0_ch0_reset_counter(&self) {
-        tpm::Tpm0::clear_counter();
+        tpm::Tpm::clear_counter(TpmNumber::ZERO);
     }
 
     fn tmp0_ch0_get_current_value(&self) -> u16 {
-        tpm::Tpm0::get_counter() as u16
+        tpm::Tpm::get_counter(TpmNumber::ZERO) as u16
     }
 
     fn get_port(&self, port: PortLetter) -> PortWrapper{

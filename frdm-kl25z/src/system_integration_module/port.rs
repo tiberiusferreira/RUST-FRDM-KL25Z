@@ -111,7 +111,23 @@ impl PortWrapper{
 
         self.raw_port_mem.pin_control_register[pin.clone() as usize].set_bit(0);
         self.raw_port_mem.pin_control_register[pin.clone() as usize].set_bit(1);
-//        Gpio::new(self.port_letter.clone(), pin)
+    }
+
+    /* ***************************************************** */
+    /* Method name:        set_pin_as_alt3                   */
+    /* Method description: sets the given pin to function    */
+    /*                     alt3                              */
+    /* Input params:       pin: the pin to configure as alt3 */
+    /* Output params:                                        */
+    /* ***************************************************** */
+    pub fn set_pin_as_alt3(&self, pin: Pin) {
+        // Clear all bits
+        self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_and(!(0b111 << 8));
+        // Set bit 8 9 and 10 (starts at 0)
+        self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_inc_or(0b011 << 8);
+
+        // enable interrupts on pin
+        self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_inc_or(0b1 << 24);
     }
 
     /* ***************************************************** */
@@ -129,10 +145,6 @@ impl PortWrapper{
 
         // enable interrupts on pin
         self.raw_port_mem.pin_control_register[pin.clone() as usize].bitwise_inc_or(0b1 << 24);
-
-//        self.raw_port_mem.pin_control_register[pin.clone() as usize].set_bit(0);
-//        self.raw_port_mem.pin_control_register[pin.clone() as usize].set_bit(1);
-//        Gpio::new(self.port_letter.clone(), pin)
     }
 
 }

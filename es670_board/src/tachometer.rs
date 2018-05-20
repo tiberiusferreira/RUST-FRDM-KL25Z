@@ -27,7 +27,7 @@ impl Es670Board{
     /* Output params:                                        */
     /* ***************************************************** */
     pub fn tachometer_counter_get_current_value(&self) -> u16{
-        self.frdm_kl25z.tmp0_ch0_get_current_value()/7
+        self.frdm_kl25z.tmp0_ch0_get_current_value()
     }
 
     /* ***************************************************** */

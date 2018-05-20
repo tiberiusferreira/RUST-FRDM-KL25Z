@@ -1,4 +1,3 @@
-zz
 extern crate es670_board;
 extern crate cortex_m;
 extern crate cortex_m_rt;
@@ -15,6 +14,9 @@ pub enum State{
     BuzzerCmd,
     BuzzerCmdDig1(u32),
     BuzzerCmdDig2(u32),
+    CoolerPwm,
+    CoolerPwmDig1(u32),
+    CoolerPwmDig2(u32),
 }
 
 
@@ -50,6 +52,9 @@ impl State {
                     },
                     'B' | 'b' => {
                         State::BuzzerCmd
+                    },
+                    'C' | 'c' => {
+                        State::CoolerPwm
                     },
                     _ => {
                         Self::send_err();
@@ -204,6 +209,47 @@ impl State {
                         Self::send_ack();
                         let duration = digit21 + digit;
                         board.turn_on_buzzer(duration);
+                        State::Idle
+                    },
+                }
+            },
+            CoolerPwm => {
+                match input.to_digit(10) {
+                    None => {
+                        Self::send_err();
+                        State::Idle
+                    },
+                    Some(digit) => {
+                        State::CoolerPwmDig1(digit.clone()*100)
+                    },
+                }
+            },
+            CoolerPwmDig1(digit2) => {
+                match input.to_digit(10) {
+                    None => {
+                        Self::send_err();
+                        State::Idle
+                    },
+                    Some(digit) => {
+                        State::CoolerPwmDig2(digit2 + digit.clone()*10)
+                    },
+                }
+            },
+            CoolerPwmDig2(digit21) => {
+                match input.to_digit(10) {
+                    None => {
+                        Self::send_err();
+                        State::Idle
+                    },
+                    Some(digit) => {
+                        Self::send_ack();
+                        let duty_cycle = digit21 + digit;
+                        Uart0::send_string("\n Got Duty");
+                        ::u32_to_str(duty_cycle).iter().for_each(|c|{
+                            Uart0::send_char(*c);
+                        });
+
+                        board.set_fan_speed(duty_cycle as u8);
                         State::Idle
                     },
                 }

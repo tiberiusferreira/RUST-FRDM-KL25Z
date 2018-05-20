@@ -16,8 +16,8 @@ extern crate cortex_m;
 extern crate cortex_m_rt;
 extern crate cortex_m_semihosting;
 extern crate arraydeque;
-//mod serial_state_machine;
-//use serial_state_machine::*;
+mod serial_state_machine;
+use serial_state_machine::*;
 use cortex_m::asm;
 use es670_board::*;
 use arraydeque::{ArrayDeque, Saturating};
@@ -61,31 +61,52 @@ fn u32_to_str(u_int: u32) -> [char; 4]{
 
 fn main() {
     let board  = Es670Board::new();
-    board.tachometer_start_counter();
+
     board.enable_low_power_timer_1hz(); // has 1hz frequency
-    board.start_fan();
-    // expect 5000 rpm = 83,333333333 rps
+    Uart0::enable_uart(115200);
+    board.init_fan();
+
+    board.turn_on_led(Led::BLUE);
+    board.delay(100);
+    board.turn_off_led(Led::BLUE);
+
+    unsafe {
+        INTERRUPTS_DEQUE = Some(ArrayDeque::<[char; 20]>::new());
+    }
+
+    Uart0::enable_rx_interrupts();
+    let mut state_machine = StateMachine::new();
+
     loop {
+        unsafe {
+            while !PERIOD_ELAPSED.get() {}
+
+            PERIOD_ELAPSED.set(false);
+        }
+        Uart0::disable_rx_interrupts();
 
         unsafe {
-            while !PERIOD_ELAPSED.get() {
-
+            if let Some(ref mut deque) = INTERRUPTS_DEQUE{
+                state_machine = mutate_state_machine_with_deque_chars(deque, state_machine);
             }
-            PERIOD_ELAPSED.set(false);
-            board.lcd_clear();
-            let counted_so_far = board.tachometer_counter_get_current_value();
-            for c in u32_to_str(counted_so_far as u32).iter(){
-                board.write_char(*c);
-            }
-            board.write_string_to_lcd(" RPS");
-            board.lcd_set_cursor(1, 0);
-            let counted_so_far_rpm = counted_so_far*60;
-            for c in u32_to_str(counted_so_far_rpm as u32).iter(){
-                board.write_char(*c);
-            }
-            board.write_string_to_lcd(" RPM");
-            board.tachometer_counter_reset();
         }
+        Uart0::enable_rx_interrupts();
+
+
+//        board.lcd_clear();
+//        let counted_so_far = board.tachometer_counter_get_current_value();
+//        for c in u32_to_str(counted_so_far as u32).iter(){
+//            board.write_char(*c);
+//            Uart0::send_char(*c);
+//        }
+//        board.write_string_to_lcd(" RPS");
+//        board.lcd_set_cursor(1, 0);
+//        let counted_so_far_rpm = counted_so_far*60;
+//        for c in u32_to_str(counted_so_far_rpm as u32).iter(){
+//            board.write_char(*c);
+//        }
+//        board.write_string_to_lcd(" RPM");
+//        board.tachometer_counter_reset();
     }
 
 }
@@ -137,7 +158,9 @@ pub extern "C" fn uart0_irq_handler() {
     let rx_char =  Uart0::read_char();
     unsafe {
         match INTERRUPTS_DEQUE {
-            None => {},
+            None => {
+                Uart0::send_string("DEQUE not initialized yet!\n");
+            },
             Some(ref mut deque) => {
                 if let Err(_) = deque.push_back(rx_char){
                     Uart0::send_string("Interrupt DEQUE is full!\n");

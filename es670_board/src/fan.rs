@@ -19,6 +19,27 @@ impl Es670Board{
         pin13.set_value(Value::High);
     }
 
+    /* ***************************************************** */
+    /* Method name:        init_fan                          */
+    /* Method description: initializes the TPM1 for the fan  */
+    /* must only be called once                              */
+    /* Input params:                                         */
+    /* Output params:                                        */
+    /* ***************************************************** */
+    pub fn init_fan(&self){
+        Tpm::init_tpm1_as_pwm();
+    }
+
+    /* ***************************************************** */
+    /* Method name:        set_fan_speed                       */
+    /* Method description: sets given duty for fan           */
+    /* Input params:                                         */
+    /* Output params:                                        */
+    /* ***************************************************** */
+    pub fn set_fan_speed(&self, duty_cyle: u8){
+        Tpm::set_duty_cycle(duty_cyle, TpmNumber::ONE, TpmChannel::ONE);
+    }
+
 
     /* ***************************************************** */
     /* Method name:        stop_fan                          */

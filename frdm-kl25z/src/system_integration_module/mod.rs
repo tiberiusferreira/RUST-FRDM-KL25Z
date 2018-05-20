@@ -15,7 +15,7 @@ pub use self::gpio::Gpio;
 pub use self::port::Pin;
 pub use self::gpio::Direction;
 pub use self::gpio::Value;
-
+use ::TpmNumber;
 const BASE_SIM : u32 = 0x4004_7000;
 
 
@@ -70,18 +70,18 @@ impl SystemIntegrationModule {
 
 
 
-    pub (crate) fn enable_tpm0_clock() {
+    pub (crate) fn enable_tpm_and_oscilator_clock(which_tpm: TpmNumber) {
         ::osc::Osc::init();
-        Self::get().system_clock_gating_control_register_6.set_bit(24);
+        Self::get().system_clock_gating_control_register_6.set_bit(24 + which_tpm as u8);
     }
 
-    pub (crate) fn select_tpm0_clock_as_oscerclk() {
+    pub (crate) fn select_tpm_clock_as_oscerclk() {
         Self::get().system_option_register_2.set_bit(25);
         Self::get().system_option_register_2.clear_bit(24);
     }
 
 
-    pub (crate) fn set_tpm0_clock_to_clkin0() {
+    pub (crate) fn set_tpm0_external_clock_to_clkin0() {
         Self::get().system_option_register_4.clear_bit(24);
     }
 
