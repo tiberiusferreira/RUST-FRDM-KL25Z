@@ -47,6 +47,12 @@ pub struct Tpm {
 }
 
 impl Tpm {
+    /* ***************************************************** */
+    /* Method name:        init_tpm1_as_pwm                  */
+    /* Method description: initializes the tpm1 module as pwm*/
+    /* Input params:                                         */
+    /* Output params:                                        */
+    /* ***************************************************** */
     pub fn init_tpm1_as_pwm(){
         let tpm_number = TpmNumber::ONE;
         Self::init_clock_as_oscerclk(tpm_number);
@@ -76,8 +82,17 @@ impl Tpm {
         Self::get(tpm_number).channel_1_value.set(0x0);
     }
 
+    /* ***************************************************** */
+    /* Method name:        set_duty_cycle                    */
+    /* Method description: sets the duty cycle of the given  */
+    /*                     pwm and channel                   */
+    /* Input params: the duty cycle = duty_percentage_0_to_100*/
+    /*             which_tpm = which tpm to act on           */
+    /*            which_channel = which tpm channel to act on*/
+    /* Output params:                                        */
+    /* ***************************************************** */
     pub fn set_duty_cycle(duty_percentage_0_to_100: u8, which_tpm: TpmNumber, which_channel: TpmChannel){
-        if duty_percentage_0_to_100 > 100 || duty_percentage_0_to_100 < 0{
+        if duty_percentage_0_to_100 > 100{
             return;
         }
         let max_counter_value = Self::get(which_tpm).modulo.get();
@@ -113,11 +128,18 @@ impl Tpm {
         }
     }
 
-    pub fn init_clock_as_oscerclk(which_tpm: TpmNumber){
+    fn init_clock_as_oscerclk(which_tpm: TpmNumber){
         SystemIntegrationModule::enable_tpm_and_oscilator_clock(which_tpm);
         SystemIntegrationModule::select_tpm_clock_as_oscerclk();
     }
 
+    /* ****************************************************************************** */
+    /* Method name:        init_tpm_0_ch_0_using_clkin0_as_hardware_counter           */
+    /* Method description: initializes the tpm 0 channel 0 as hardware counter        */
+    /* with clkin0 as external clock                                                  */
+    /* Input params:                                                                  */
+    /* Output params:                                                                 */
+    /* ****************************************************************************** */
     pub fn init_tpm_0_ch_0_using_clkin0_as_hardware_counter(){
         // PortE Pin29 is used as CLKIN0
         let port_e = SystemIntegrationModule::enable_port_for_use(PortLetter::PortE);
@@ -143,6 +165,12 @@ impl Tpm {
         Self::get(TpmNumber::ZERO).channel_0_status_and_control.clear_bit(2);
     }
 
+    /* ***************************************************** */
+    /* Method name:        clear_current_interrupt           */
+    /* Method description: clears the current interrupt      */
+    /* Input params:    which_tpm = which tpm to act on      */
+    /* Output params:                                        */
+    /* ***************************************************** */
     pub fn clear_current_interrupt(which_tpm: TpmNumber){
         while Self::get(which_tpm).channel_0_status_and_control.get_bit(7){
             Self::get(which_tpm).channel_0_status_and_control.set_bit(7);

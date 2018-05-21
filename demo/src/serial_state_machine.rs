@@ -244,11 +244,6 @@ impl State {
                     Some(digit) => {
                         Self::send_ack();
                         let duty_cycle = digit21 + digit;
-                        Uart0::send_string("\n Got Duty");
-                        ::u32_to_str(duty_cycle).iter().for_each(|c|{
-                            Uart0::send_char(*c);
-                        });
-
                         board.set_fan_speed(duty_cycle as u8);
                         State::Idle
                     },

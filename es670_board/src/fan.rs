@@ -8,12 +8,12 @@ pub use frdm_kl25z::Value::{High, Low};
 
 impl Es670Board{
     /* ***************************************************** */
-    /* Method name:        start_fan                         */
-    /* Method description: starts the fan                    */
+    /* Method name:        start_fan_as_gpio                 */
+    /* Method description: starts the fan as a GPIO          */
     /* Input params:                                         */
     /* Output params:                                        */
     /* ***************************************************** */
-    pub fn start_fan(&self){
+    pub fn start_fan_as_gpio(&self){
         let port_a = self.frdm_kl25z.get_port(PortLetter::PortA);
         let pin13 = port_a.set_pin_as_gpio(Pin::Pin13);
         pin13.set_value(Value::High);
@@ -26,7 +26,7 @@ impl Es670Board{
     /* Input params:                                         */
     /* Output params:                                        */
     /* ***************************************************** */
-    pub fn init_fan(&self){
+    pub fn init_fan_as_pwm(&self){
         Tpm::init_tpm1_as_pwm();
     }
 
@@ -42,12 +42,12 @@ impl Es670Board{
 
 
     /* ***************************************************** */
-    /* Method name:        stop_fan                          */
+    /* Method name:        stop_fan_as_gpio                  */
     /* Method description: stops the fan                     */
     /* Input params:                                         */
     /* Output params:                                        */
     /* ***************************************************** */
-    pub fn stop_fan(&self){
+    pub fn stop_fan_as_gpio(&self){
         let port_a = self.frdm_kl25z.get_port(PortLetter::PortA);
         let pin13 = port_a.set_pin_as_gpio(Pin::Pin13);
         pin13.set_value(Value::Low);
