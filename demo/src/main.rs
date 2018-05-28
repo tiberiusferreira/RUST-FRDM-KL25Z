@@ -77,6 +77,8 @@ fn main() {
     Uart0::enable_rx_interrupts();
     let mut state_machine = StateMachine::new();
     board.tachometer_start_counter();
+
+
     loop {
         unsafe {
             while !PERIOD_ELAPSED.get() {}

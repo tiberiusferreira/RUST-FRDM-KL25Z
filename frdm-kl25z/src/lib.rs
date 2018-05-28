@@ -131,10 +131,11 @@ pub trait FrdmKl25z{
     /* Output params:                                        */
     /* ***************************************************** */
     fn delay_ms(&self, millis: u32);
+
 }
 
 impl FrdmKl25zBoard {
-    fn delay_1ms(&self){
+    fn delay_1ms(){
         // Default freq = 20.48 mhz https://community.nxp.com/thread/311769
         // one compare
         // one nop
@@ -153,9 +154,7 @@ impl FrdmKl25zBoard {
 impl FrdmKl25z for FrdmKl25zBoard{
 
     fn new() -> FrdmKl25zBoard{
-        let kl25z = FrdmKl25zBoard{
-
-        };
+        let kl25z = FrdmKl25zBoard{};
         kl25z.delay_ms(500);
         kl25z
     }
@@ -165,34 +164,27 @@ impl FrdmKl25z for FrdmKl25zBoard{
     fn enable_low_power_timer_1hz(&self) {
         lptm_0::Lptm0::init_1hz();
     }
-
-
     fn clear_lptm_interrupt(){
         lptm_0::Lptm0::clear_current_interrupt();
     }
-
     fn clear_tpm0_interrupt(){
         tpm::Tpm::clear_current_interrupt(TpmNumber::ZERO);
     }
-
     fn init_tpm0_ch0_as_hardware_counter(&self) {
         tpm::Tpm::init_tpm_0_ch_0_using_clkin0_as_hardware_counter();
     }
-
     fn tmp0_ch0_reset_counter(&self) {
         tpm::Tpm::clear_counter(TpmNumber::ZERO);
     }
-
     fn tmp0_ch0_get_current_value(&self) -> u16 {
         tpm::Tpm::get_counter(TpmNumber::ZERO) as u16
     }
-
     fn get_port(&self, port: PortLetter) -> PortWrapper{
         SystemIntegrationModule::enable_port_for_use(port)
     }
     fn delay_ms(&self, mut millis: u32) {
         while millis > 0 {
-            self.delay_1ms();
+            Self::delay_1ms();
             millis = millis - 1;
         }
     }

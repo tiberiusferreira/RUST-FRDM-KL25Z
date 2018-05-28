@@ -71,7 +71,8 @@ impl Tpm {
 
         // Freq = 8MHz / MOD = 8*10^6/16385 16385=max value for 16 bits
         // Freq = 488 Hz Period = 2ms
-        Self::get(tpm_number).modulo.set(0xFFFF);
+//        Self::get(tpm_number).modulo.set(0xFFFF);
+        Self::get(tpm_number).modulo.set(1000);
 
         // Increase counter on every clock
         Self::get(tpm_number).status_and_control.set_bit(3);
@@ -80,6 +81,29 @@ impl Tpm {
         Self::get(tpm_number).channel_1_status_and_control.bitwise_inc_or(0b0010_1000);
 
         Self::get(tpm_number).channel_1_value.set(0x0);
+    }
+
+
+    /* ***************************************************** */
+    /* Method name:        change_freq_tpm1_ch_1_pwm         */
+    /* Method description: sets the PWM frequency            */
+    /* Input params: freq_percentage_0_to_100 the PWM        */
+    /*             frequency from 0 to 100 percent           */
+    /*             of the maximum which is around 488Hz      */
+    /* Output params:                                        */
+    /* ***************************************************** */
+    pub fn change_freq_tpm1_ch_1_pwm(freq_percentage_0_to_100: u8){
+        if freq_percentage_0_to_100 > 100{
+            return;
+        }
+        let old_module = Self::get(TpmNumber::ONE).modulo.get();
+        let old_cnv =  Self::get(TpmNumber::ONE).channel_1_value.get();
+        let old_duty = ((((old_cnv as f64) / (old_module as f64)) as f64)*(100.0 as f64)) as u8;
+        let new_module = ((((freq_percentage_0_to_100 as f32)/(100.0 as f32)) as f32) * ((0xFFFF as u32) as f32)) as u32;
+        Self::get(TpmNumber::ONE).modulo.set(new_module);
+        ::FrdmKl25zBoard::delay_1ms(); // wait for it to sync with the counter modules
+        Self::set_duty_cycle(old_duty, TpmNumber::ONE, TpmChannel::ONE);
+
     }
 
     /* ***************************************************** */
@@ -117,8 +141,6 @@ impl Tpm {
                 Self::get(which_tpm).channel_5_value.set(match_value);
             }
         }
-
-
     }
 
     pub (crate) fn get(which_tpm: TpmNumber) -> &'static Tpm {
