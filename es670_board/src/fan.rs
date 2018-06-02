@@ -32,14 +32,14 @@ impl Es670Board{
     }
 
     /* ***************************************************** */
-    /* Method name:        init_fan_as_pwm                   */
+    /* Method name:        init_fan_n_heater_as_pwm          */
     /* Method description: initializes the TPM1 as PWM for   */
     /* controlling the fan. Must only be called once         */
     /* Input params:                                         */
     /* Output params:                                        */
     /* ***************************************************** */
-    pub fn init_fan_as_pwm(&self){
-        Tpm::init_tpm1_as_pwm();
+    pub fn init_fan_n_heater_as_pwm(&self){
+        Tpm::init_tpm1_ch0_n_ch1_as_pwm();
     }
 
     /* ***************************************************** */
@@ -55,13 +55,14 @@ impl Es670Board{
 
 
     /* ***************************************************** */
-    /* Method name:        set_fan_pwm_freq                  */
+    /* Method name:        set_fan_n_heater_pwm_freq         */
     /* Method description: sets given pwm frequency for fan  */
+    /*                     and heater                        */
     /* Input params:                                         */
     /* Output params:                                        */
     /* ***************************************************** */
-    pub fn set_fan_pwm_freq(&self, freq_percentage_from_0_to_100: u8){
-        Tpm::change_freq_tpm1_ch_1_pwm(freq_percentage_from_0_to_100);
+    pub fn set_fan_n_heater_pwm_freq(&self, freq_percentage_from_0_to_100: u8){
+        Tpm::change_freq_tpm1_pwm(freq_percentage_from_0_to_100);
     }
 
 

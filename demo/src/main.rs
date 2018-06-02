@@ -47,7 +47,7 @@ fn digit_to_char(u_int: u32) -> char{
     }
 }
 
-fn u32_to_str(u_int: u32) -> [char; 4]{
+fn u32_to_str(u_int: u32) -> [char; 5]{
     let mut copy = u_int;
     let first_digit = digit_to_char(copy%10);
     copy = copy/10;
@@ -56,62 +56,10 @@ fn u32_to_str(u_int: u32) -> [char; 4]{
     let third_digit = digit_to_char(copy%10);
     copy = copy/10;
     let forth_digit = digit_to_char(copy%10);
-    [forth_digit, third_digit, second_digit, first_digit]
+    copy = copy/10;
+    let fifth_digit = digit_to_char(copy%10);
+    [fifth_digit, forth_digit, third_digit, second_digit, first_digit]
 }
-
-fn main() {
-    let board  = Es670Board::new();
-
-    board.enable_low_power_timer_1hz(); // has 1hz frequency
-    Uart0::enable_uart(115200);
-    board.init_fan_as_pwm();
-
-    board.turn_on_led(Led::BLUE);
-    board.delay(100);
-    board.turn_off_led(Led::BLUE);
-
-    unsafe {
-        INTERRUPTS_DEQUE = Some(ArrayDeque::<[char; 20]>::new());
-    }
-
-    Uart0::enable_rx_interrupts();
-    let mut state_machine = StateMachine::new();
-    board.tachometer_start_counter();
-
-
-    loop {
-        unsafe {
-            while !PERIOD_ELAPSED.get() {}
-
-            PERIOD_ELAPSED.set(false);
-        }
-        Uart0::disable_rx_interrupts();
-
-        unsafe {
-            if let Some(ref mut deque) = INTERRUPTS_DEQUE{
-                state_machine = mutate_state_machine_with_deque_chars(deque, state_machine);
-            }
-        }
-        Uart0::enable_rx_interrupts();
-
-
-        board.lcd_clear();
-        let counted_so_far = board.tachometer_counter_get_current_value();
-        for c in u32_to_str(counted_so_far as u32).iter(){
-            board.write_char(*c);
-        }
-        board.write_string_to_lcd(" RPS");
-        board.lcd_set_cursor(1, 0);
-        let counted_so_far_rpm = counted_so_far*60;
-        for c in u32_to_str(counted_so_far_rpm as u32).iter(){
-            board.write_char(*c);
-        }
-        board.write_string_to_lcd(" RPM");
-        board.tachometer_counter_reset();
-    }
-
-}
-
 
 #[link_section = ".vector_table.interrupts"]
 #[used]
@@ -150,6 +98,82 @@ pub static INTERRUPTS: [unsafe extern "C" fn(); 31] =
         default_handler, // 30
     ]
 ;
+
+
+fn main() {
+    let board  = Es670Board::new();
+
+    board.turn_on_led(Led::BLUE);
+    board.delay(100);
+    board.turn_off_led(Led::BLUE);
+    board.enable_low_power_timer_1hz(); // has 1hz frequency
+    Uart0::enable_uart(115200);
+    board.init_fan_n_heater_as_pwm();
+
+
+    board.delay(300);
+    board.turn_on_led(Led::BLUE);
+    board.delay(100);
+    board.turn_off_led(Led::BLUE);
+
+    board.set_fan_speed(30);
+    board.set_heater_intensity(50);
+//    Adc::init_adc();
+
+
+    unsafe {
+        INTERRUPTS_DEQUE = Some(ArrayDeque::<[char; 20]>::new());
+    }
+
+
+
+//    Uart0::enable_rx_interrupts();
+//    let mut state_machine = StateMachine::new();
+//    board.tachometer_start_counter();
+
+//    board.write("Ok!");
+    loop {
+
+
+//        Adc::init_conversion();
+//        board.delay(100);
+//        let result = Adc::get_result();
+//        for c in u32_to_str(result as u32).iter(){
+//            Uart0::send_char(*c);
+//        }
+//        Uart0::send_char('\n');
+//        board.delay(1000);
+//        unsafe {
+//            while !PERIOD_ELAPSED.get() {}
+//
+//            PERIOD_ELAPSED.set(false);
+//        }
+//        Uart0::disable_rx_interrupts();
+//
+//        unsafe {
+//            if let Some(ref mut deque) = INTERRUPTS_DEQUE{
+//                state_machine = mutate_state_machine_with_deque_chars(deque, state_machine);
+//            }
+//        }
+//        Uart0::enable_rx_interrupts();
+//
+//
+//        board.lcd_clear();
+//        let counted_so_far = board.tachometer_counter_get_current_value();
+//        for c in u32_to_str(counted_so_far as u32).iter(){
+//            board.write_char(*c);
+//        }
+//        board.write_string_to_lcd(" RPS");
+//        board.lcd_set_cursor(1, 0);
+//        let counted_so_far_rpm = counted_so_far*60;
+//        for c in u32_to_str(counted_so_far_rpm as u32).iter(){
+//            board.write_char(*c);
+//        }
+//        board.write_string_to_lcd(" RPM");
+//        board.tachometer_counter_reset();
+    }
+
+}
 
 pub extern "C" fn default_handler() {
     asm::bkpt();

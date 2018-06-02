@@ -286,7 +286,7 @@ impl State {
                     Some(digit) => {
                         Self::send_ack();
                         let freq = digit21 + digit;
-                        board.set_fan_pwm_freq(freq as u8);
+                        board.set_fan_n_heater_pwm_freq(freq as u8);
                         State::Idle
                     },
                 }

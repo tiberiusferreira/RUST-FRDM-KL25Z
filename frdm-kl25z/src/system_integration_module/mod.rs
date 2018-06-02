@@ -75,6 +75,10 @@ impl SystemIntegrationModule {
         Self::get().system_clock_gating_control_register_6.set_bit(24 + which_tpm as u8);
     }
 
+    pub (crate) fn enable_adc_clock() {
+        Self::get().system_clock_gating_control_register_6.set_bit(27);
+    }
+
     pub (crate) fn select_tpm_clock_as_oscerclk() {
         Self::get().system_option_register_2.set_bit(25);
         Self::get().system_option_register_2.clear_bit(24);

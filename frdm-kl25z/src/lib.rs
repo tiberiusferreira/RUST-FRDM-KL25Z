@@ -24,8 +24,10 @@ mod nvic;
 mod tpm;
 mod osc;
 mod smc;
+mod adc;
 
 pub use uart_0::Uart0;
+pub use adc::*;
 pub use tpm::{Tpm, TpmNumber, TpmChannel};
 pub use multi_purpose_clock_generator::MultiPurposeClockGenerator;
 pub use system_integration_module::PortLetter;

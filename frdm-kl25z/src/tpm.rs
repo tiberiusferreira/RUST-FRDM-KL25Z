@@ -46,14 +46,17 @@ pub struct Tpm {
     pub channel_5_value: VolatileRW<u32>,
 }
 
+// Heater =  TPM 1  CH 0
+// Fan =  TPM 1  CH 1
 impl Tpm {
     /* ***************************************************** */
-    /* Method name:        init_tpm1_as_pwm                  */
-    /* Method description: initializes the tpm1 module as pwm*/
+    /* Method name:        init_tpm1_ch0_n_ch1_as_pwm        */
+    /* Method description: initializes the tpm1 module       */
+    /*                     channel 0 and channel 1 as PWM    */
     /* Input params:                                         */
     /* Output params:                                        */
     /* ***************************************************** */
-    pub fn init_tpm1_as_pwm(){
+    pub fn init_tpm1_ch0_n_ch1_as_pwm(){
         let tpm_number = TpmNumber::ONE;
         Self::init_clock_as_oscerclk(tpm_number);
 
@@ -61,18 +64,21 @@ impl Tpm {
         let port_a = SystemIntegrationModule::enable_port_for_use(PortLetter::PortA);
         port_a.set_pin_as_alt3(Pin::Pin13);
 
-        // Prescale 1:1 only writtable when counter is disabled
+        // Select PORTA PIN12 as PWM for TPM1 CH0
+        port_a.set_pin_as_alt3(Pin::Pin12);
+
+        // Prescale 1:1 only writable when counter is disabled
         Self::get(tpm_number).status_and_control.clear_bit(0);
         Self::get(tpm_number).status_and_control.clear_bit(1);
         Self::get(tpm_number).status_and_control.clear_bit(2);
 
-        // Center-aligned PWM Select Only writtable when counter is disabled
+        // Center-aligned PWM Select Only writable when counter is disabled
         Self::get(tpm_number).status_and_control.clear_bit(5);
 
-        // Freq = 8MHz / MOD = 8*10^6/16385 16385=max value for 16 bits
-        // Freq = 488 Hz Period = 2ms
-//        Self::get(tpm_number).modulo.set(0xFFFF);
-        Self::get(tpm_number).modulo.set(1000);
+        // Freq = 8MHz / MOD = 8*10^6/65535 65535=max value for 16 bits
+        // Freq = 122 Hz Period = 8ms
+        Self::get(tpm_number).modulo.set(0xFFFF);
+//        Self::get(tpm_number).modulo.set(1000);
 
         // Increase counter on every clock
         Self::get(tpm_number).status_and_control.set_bit(3);
@@ -81,6 +87,10 @@ impl Tpm {
         Self::get(tpm_number).channel_1_status_and_control.bitwise_inc_or(0b0010_1000);
 
         Self::get(tpm_number).channel_1_value.set(0x0);
+
+        Self::get(tpm_number).channel_0_status_and_control.bitwise_inc_or(0b0010_1000);
+
+        Self::get(tpm_number).channel_0_value.set(0x0);
     }
 
 
@@ -92,18 +102,20 @@ impl Tpm {
     /*             of the maximum which is around 488Hz      */
     /* Output params:                                        */
     /* ***************************************************** */
-    pub fn change_freq_tpm1_ch_1_pwm(freq_percentage_0_to_100: u8){
+    pub fn change_freq_tpm1_pwm(freq_percentage_0_to_100: u8){
         if freq_percentage_0_to_100 > 100{
             return;
         }
         let old_module = Self::get(TpmNumber::ONE).modulo.get();
-        let old_cnv =  Self::get(TpmNumber::ONE).channel_1_value.get();
-        let old_duty = ((((old_cnv as f64) / (old_module as f64)) as f64)*(100.0 as f64)) as u8;
+        let old_cnv_ch1 =  Self::get(TpmNumber::ONE).channel_1_value.get();
+        let old_cnv_ch0 =  Self::get(TpmNumber::ONE).channel_0_value.get();
+        let old_duty_ch1 = ((((old_cnv_ch1 as f64) / (old_module as f64)) as f64)*(100.0 as f64)) as u8;
+        let old_duty_ch0 = ((((old_cnv_ch0 as f64) / (old_module as f64)) as f64)*(100.0 as f64)) as u8;
         let new_module = ((((freq_percentage_0_to_100 as f32)/(100.0 as f32)) as f32) * ((0xFFFF as u32) as f32)) as u32;
         Self::get(TpmNumber::ONE).modulo.set(new_module);
         ::FrdmKl25zBoard::delay_1ms(); // wait for it to sync with the counter modules
-        Self::set_duty_cycle(old_duty, TpmNumber::ONE, TpmChannel::ONE);
-
+        Self::set_duty_cycle(old_duty_ch1, TpmNumber::ONE, TpmChannel::ONE);
+        Self::set_duty_cycle(old_duty_ch0, TpmNumber::ONE, TpmChannel::ZERO);
     }
 
     /* ***************************************************** */
@@ -120,7 +132,7 @@ impl Tpm {
             return;
         }
         let max_counter_value = Self::get(which_tpm).modulo.get();
-        let match_value = ((max_counter_value as f64)*((duty_percentage_0_to_100 as f64/100.0) as f64))as u32;
+        let match_value = ((max_counter_value as f64)*(duty_percentage_0_to_100 as f64/(100.0 as f64)))as u32;
         match which_channel {
             TpmChannel::ZERO => {
                 Self::get(which_tpm).channel_0_value.set(match_value);

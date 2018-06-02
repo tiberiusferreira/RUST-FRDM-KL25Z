@@ -16,6 +16,7 @@ mod display;
 mod switch;
 mod lcd;
 mod fan;
+mod heater;
 mod tachometer;
 pub use switch::*;
 pub use led::*;
