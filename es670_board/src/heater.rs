@@ -18,6 +18,8 @@ impl Es670Board{
     pub fn set_heater_intensity(&self, duty_cyle: u8){
         Tpm::set_duty_cycle(duty_cyle, TpmNumber::ONE, TpmChannel::ZERO);
     }
-    
+
+
+
 
 }
