@@ -47,8 +47,8 @@ impl Es670Board {
         es670_board
     }
 
-    pub fn enable_low_power_timer_1hz(&self){
-        self.frdm_kl25z.enable_low_power_timer_1hz();
+    pub fn enable_low_power_timer(&self, period_ms: u16){
+        self.frdm_kl25z.enable_low_power_timer(period_ms);
     }
 
 

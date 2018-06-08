@@ -11,6 +11,13 @@
 #![feature(used)]
 #![feature(core_intrinsics)]
 #![feature(asm)]
+#![feature(panic_implementation)]
+#![no_main]
+#[macro_use]
+extern crate cortex_m_rt as rt;
+extern crate cortex_m_semihosting as sh;
+use core::intrinsics;
+use core::panic::PanicInfo;
 extern crate es670_board;
 extern crate cortex_m;
 extern crate cortex_m_rt;
@@ -22,6 +29,7 @@ use cortex_m::asm;
 use es670_board::*;
 use arraydeque::{ArrayDeque, Saturating};
 use core::cell::UnsafeCell;
+use rt::ExceptionFrame;
 
 static mut INTERRUPTS_DEQUE: Option<ArrayDeque<[char; 20], Saturating>> = None;
 
@@ -32,41 +40,23 @@ static mut PERIOD_ELAPSED: VolatileRW<bool> = es670_board::VolatileRW{
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *                   TABELA PARA USO DO SENSOR DE TEMPERATURA            *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-//const TABELA_TEMP :[u8; 256] = [
-////    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 						//15
-////    0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1, 						//31
-////    2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9, 						//47
-////    10,10,11,11,12,12,13,13,14,14,15,15,16,16,17,17, 				//63
-////    18,18,19,19,20,20,21,21,22,22,23,23,23,24,24,25, 				//79
-////    25,26,26,27,27,28,28,29,29,30,30,31,31,32,32,33, 				//95
-////    33,34,34,35,35,36,36,37,37,38,38,39,39,40,40,41, 				//111
-////    41,42,42,43,43,44,44,45,45,46,46,47,47,48,48,49, 				//127
-////    49,50,50,51,51,52,52,53,53,54,54,55,55,56,56,57, 				//143
-////    57,58,58,59,59,60,60,61,61,62,62,63,63,64,64,65, 				//159
-////    65,66,66,67,67,68,68,69,69,70,70,71,71,72,72,73, 				//175
-////    73,74,74,75,75,76,76,77,77,78,78,79,79,80,80,81, 				//191
-////    81,82,82,83,83,84,84,85,85,86,86,87,87,88,88,089, 				//207
-////    89,90,90,91,91,92,92,93,93,94,94,95,95,96,96,097, 				//223
-////    97,98,98,99,99,100,100,101,101,102,102,103,103,104,104,104, 	                //239
-////    105,105,106,106,107,107,108,108,109,109,110,110,111,111,112,112                 //255
-////];
 const TABELA_TEMP :[u8; 256] = [
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,					//15
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,					//31
-1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 5, 5, 6, 6, 6, 6,					//47
-7, 7, 8, 8, 8, 8, 9, 9, 10, 10, 10, 10, 11, 11, 12, 12,			//63
-12, 12, 13, 13, 14, 14, 15, 15, 15, 15, 16, 16, 16, 17, 17, 17,	//79
-17, 18, 18, 19, 19, 19, 19, 20, 20, 21, 21, 21, 21, 22, 22, 23,	//95
-23, 24, 24, 24, 24, 25, 25, 26, 26, 26, 26, 27, 27, 28, 28, 28,	//111
-28, 29, 29, 30, 30, 30, 30, 31, 31, 32, 32, 32, 32, 33, 33, 34,	//127
-34, 35, 35, 35, 35, 36, 36, 37, 37, 37, 37, 38, 38, 39, 39, 39,	//143
-39, 40, 40, 41, 41, 41, 41, 42, 42, 43, 43, 44, 44, 44, 44, 45,	//159
-45, 46, 46, 46, 46, 47, 47, 48, 48, 48, 48, 49, 49, 50, 50, 50,	//175
-50, 51, 51, 52, 52, 53, 53, 53, 53, 54, 54, 55, 55, 55, 55, 56,	//191
-56, 57, 57, 57, 57, 58, 58, 59, 59, 59, 59, 60, 60, 61, 61, 62,	//207
-62, 62, 62, 63, 63, 64, 64, 64, 64, 65, 65, 66, 66, 66, 66, 67,	//223
-67, 68, 68, 68, 68, 69, 69, 70, 70, 71, 71, 71, 71, 72, 72, 72,	//239
-73, 73, 73, 73, 74, 74, 75, 75, 75, 75, 76, 76, 77, 77, 77, 77	//255
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,					//15
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,					//31
+    1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 5, 5, 6, 6, 6, 6,					//47
+    7, 7, 8, 8, 8, 8, 9, 9, 10, 10, 10, 10, 11, 11, 12, 12,			//63
+    12, 12, 13, 13, 14, 14, 15, 15, 15, 15, 16, 16, 16, 17, 17, 17,	//79
+    17, 18, 18, 19, 19, 19, 19, 20, 20, 21, 21, 21, 21, 22, 22, 23,	//95
+    23, 24, 24, 24, 24, 25, 25, 26, 26, 26, 26, 27, 27, 28, 28, 28,	//111
+    28, 29, 29, 30, 30, 30, 30, 31, 31, 32, 32, 32, 32, 33, 33, 34,	//127
+    34, 35, 35, 35, 35, 36, 36, 37, 37, 37, 37, 38, 38, 39, 39, 39,	//143
+    39, 40, 40, 41, 41, 41, 41, 42, 42, 43, 43, 44, 44, 44, 44, 45,	//159
+    45, 46, 46, 46, 46, 47, 47, 48, 48, 48, 48, 49, 49, 50, 50, 50,	//175
+    50, 51, 51, 52, 52, 53, 53, 53, 53, 54, 54, 55, 55, 55, 55, 56,	//191
+    56, 57, 57, 57, 57, 58, 58, 59, 59, 59, 59, 60, 60, 61, 61, 62,	//207
+    62, 62, 62, 63, 63, 64, 64, 64, 64, 65, 65, 66, 66, 66, 66, 67,	//223
+    67, 68, 68, 68, 68, 69, 69, 70, 70, 71, 71, 71, 71, 72, 72, 72,	//239
+    73, 73, 73, 73, 74, 74, 75, 75, 75, 75, 76, 76, 77, 77, 77, 77	//255
 ];
 fn digit_to_char(u_int: u32) -> char{
     let u_int = u_int%10;
@@ -99,83 +89,82 @@ fn u32_to_str(u_int: u32) -> [char; 5]{
     [fifth_digit, forth_digit, third_digit, second_digit, first_digit]
 }
 
+
+pub union Vector {
+    handler: extern "C" fn(),
+    reserved: usize,
+}
+
 #[link_section = ".vector_table.interrupts"]
-#[used]
-pub static INTERRUPTS: [unsafe extern "C" fn(); 31] =
-    [
-        default_handler, // 0
-        default_handler, // 1
-        default_handler, // 2
-        default_handler, // 3
-        default_handler, // 4
-        default_handler, // 5
-        default_handler, // 6
-        default_handler, // 7
-        default_handler, // 8
-        default_handler, // 9
-        default_handler, // 10
-        default_handler, // 11
-        uart0_irq_handler, // 12
-        default_handler, // 13
-        default_handler, // 14
-        default_handler, // 15
-        default_handler, // 16
-        tpm0_irq_handler, // 17
-        default_handler, // 18
-        default_handler, // 19
-        default_handler, // 20
-        default_handler, // 21
-        default_handler, // 22
-        default_handler, // 23
-        default_handler, // 24
-        default_handler, // 25
-        default_handler, // 26
-        default_handler, // 27
-        lptm_irq_handler, // 28
-        default_handler, // 29
-        default_handler, // 30
-    ]
-;
+#[no_mangle]
+pub static __INTERRUPTS: [Vector; 31] = [
+    Vector { reserved: 0 }, // 0
+    Vector { reserved: 0 }, // 1
+    Vector { reserved: 0 }, // 2
+    Vector { reserved: 0 }, // 3
+    Vector { reserved: 0 }, // 4
+    Vector { reserved: 0 }, // 5
+    Vector { reserved: 0 }, // 6
+    Vector { reserved: 0 }, // 7
+    Vector { reserved: 0 }, // 8
+    Vector { reserved: 0 }, // 9
+    Vector { reserved: 0 }, // 10
+    Vector { reserved: 0 }, // 11
+    Vector { handler: uart0_irq_handler }, // 12
+    Vector { reserved: 0 }, // 13
+    Vector { reserved: 0 }, // 14
+    Vector { reserved: 0 }, // 15
+    Vector { reserved: 0 }, // 16
+    Vector { handler: tpm0_irq_handler }, // 17
+    Vector { reserved: 0 }, // 18
+    Vector { reserved: 0 }, // 19
+    Vector { reserved: 0 }, // 20
+    Vector { reserved: 0 }, // 21
+    Vector { reserved: 0 }, // 22
+    Vector { reserved: 0 }, // 23
+    Vector { reserved: 0 }, // 24
+    Vector { reserved: 0 }, // 25
+    Vector { reserved: 0 }, // 26
+    Vector { reserved: 0 }, // 27
+    Vector { handler: lptm_irq_handler }, // 28
+    Vector { reserved: 0 }, // 29
+    Vector { reserved: 0 }, // 30
+];
 
+entry!(main);
 
-fn main() {
+fn main() -> ! {
     let board  = Es670Board::new();
 
-    board.turn_on_led(Led::BLUE);
+    board.turn_on_led(Led::RED);
     board.delay(100);
-    board.turn_off_led(Led::BLUE);
-    board.enable_low_power_timer_1hz(); // has 1hz frequency
+    board.turn_off_led(Led::RED);
+    board.enable_low_power_timer(500); // has 1hz frequency
     Uart0::enable_uart(115200);
     board.init_fan_n_heater_as_pwm();
 
-
-// 1.26v
-
-    board.delay(300);
-    board.turn_on_led(Led::BLUE);
-    board.delay(100);
-    board.turn_off_led(Led::BLUE);
-
-//    board.set_fan_speed(100);
-//    board.set_heater_intensity(60);
+    board.set_fan_speed(100);
+    board.set_heater_intensity(50);
     Adc::init_adc();
 
 
     unsafe {
         INTERRUPTS_DEQUE = Some(ArrayDeque::<[char; 20]>::new());
     }
-
-
-
 //    Uart0::enable_rx_interrupts();
 //    let mut state_machine = StateMachine::new();
 //    board.tachometer_start_counter();
 
 //    board.write("Ok!");
     loop {
-
-
+        unsafe {
+            while !PERIOD_ELAPSED.get() {}
+            PERIOD_ELAPSED.set(false);
+        }
         Adc::init_conversion();
+        while !Adc::conversion_is_done() {
+
+        }
         board.delay(100);
         let result = Adc::get_result();
         let result_usize = Adc::get_result() as usize;
@@ -186,11 +175,7 @@ fn main() {
             Uart0::send_char(*c);
         }
         Uart0::send_char('\n');
-//        Uart0::send_string("Valor Volts: ");
-//        for c in u32_to_str(((result as u32)*(100/5))*128 as u32).iter(){
-//            Uart0::send_char(*c);
-//        }
-        Uart0::send_char('\n');
+
         Uart0::send_string("Valor Graus: ");
         for c in u32_to_str(temp as u32).iter(){
             Uart0::send_char(*c);
@@ -237,6 +222,18 @@ pub extern "C" fn default_handler() {
     asm::bkpt();
 }
 
+exception!(*, exception_default_handler);
+
+fn exception_default_handler(irqn: i16) {
+    panic!("Unhandled exception (IRQn = {})", irqn);
+}
+
+exception!(HardFault, hard_fault);
+
+fn hard_fault(ef: &ExceptionFrame) -> ! {
+    panic!("HardFault at {:#?}", ef);
+}
+
 pub extern "C" fn uart0_irq_handler() {
     let rx_char =  Uart0::read_char();
     unsafe {
@@ -265,4 +262,8 @@ pub extern "C" fn tpm0_irq_handler() {
     Es670Board::clear_tmp0_interrupt();
 }
 
-
+#[no_mangle]
+#[panic_implementation]
+fn panic(_info: &PanicInfo) -> ! {
+    unsafe { intrinsics::abort() }
+}

@@ -16,13 +16,6 @@ const ADLSMP: u32 = 0b0 << 4; // Short sample time configuration
 const ADIV: u32 = 0b00 << 5; // Clock Divide Select (Divide by 1)
 const ADLPC: u32 = 0b0 << 7; // Normal power Configuration
 
-const ADC_SC2_REFSEL: u32 = 0b00 << 0; // reference voltage selection - external pins
-const ADC_SC2_DMAEN: u32 = 0b0 << 2; // dma disabled
-const ADC_SC2_ACREN: u32 = 0b0 << 3; // dont care - range function
-const ADC_SC2_ACFGT: u32 = 0b0 << 4; // dont care - 0 -> Less than, 1 -> Greater Than
-const ADC_SC2_ACFE: u32 = 0b0 << 5; // compare function disabled
-const ADC_SC2_ADTRG: u32 = 0b0 << 6; // When software trigger is selected, a conversion is initiated following a write to SC1A
-
 
 #[repr(C)]
 pub struct Adc {
@@ -79,12 +72,12 @@ impl Adc {
         Self::get().status_and_control_1_a.set(0b00_00100);
     }
 
-    pub fn conversion_is_done(){
-        Self::get().status_and_control_1_a.get_bit(7);
+    pub fn conversion_is_done() -> bool{
+        Self::get().status_and_control_1_a.get_bit(7)
     }
 
-    pub fn get_result() -> u32{
-        Self::get().result_a.get()
+    pub fn get_result() -> u16{
+        Self::get().result_a.get() as u16
     }
 
 }

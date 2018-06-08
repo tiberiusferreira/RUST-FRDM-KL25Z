@@ -28,7 +28,7 @@ impl Lptm0 {
     }
 
     ///TODO: make it take the period as input
-    pub fn init_1hz(){
+    pub fn init(period_ms: u16){
         ::system_integration_module::SystemIntegrationModule::enable_software_control_of_lptm();
 
         // Disables the LPTM
@@ -53,22 +53,23 @@ impl Lptm0 {
         Self::get().low_power_timer_prescale_register.set_bit(0);
         Self::get().low_power_timer_prescale_register.clear_bit(1);
 
-        // Enable prescaler
-        Self::get().low_power_timer_prescale_register.clear_bit(2);
+        // Disable prescaler so frequency = 1000Hz
+        Self::get().low_power_timer_prescale_register.set_bit(2);
 
         // Enable prescaler divide by 2 -> outs 500Hz
-        Self::get().low_power_timer_prescale_register.clear_bit(3);
-        Self::get().low_power_timer_prescale_register.clear_bit(4);
-        Self::get().low_power_timer_prescale_register.clear_bit(5);
-        Self::get().low_power_timer_prescale_register.clear_bit(6);
+//        Self::get().low_power_timer_prescale_register.clear_bit(3);
+//        Self::get().low_power_timer_prescale_register.clear_bit(4);
+//        Self::get().low_power_timer_prescale_register.clear_bit(5);
+//        Self::get().low_power_timer_prescale_register.clear_bit(6);
 
         // Set comparator to 500 so we get 1Hz clock
-        Self::get().low_power_timer_compare_register.set_bit(2);
-        Self::get().low_power_timer_compare_register.set_bit(4);
-        Self::get().low_power_timer_compare_register.set_bit(5);
-        Self::get().low_power_timer_compare_register.set_bit(6);
-        Self::get().low_power_timer_compare_register.set_bit(7);
-        Self::get().low_power_timer_compare_register.set_bit(8);
+        Self::get().low_power_timer_compare_register.set(period_ms as u32);
+//        Self::get().low_power_timer_compare_register.set_bit(2);
+//        Self::get().low_power_timer_compare_register.set_bit(4);
+//        Self::get().low_power_timer_compare_register.set_bit(5);
+//        Self::get().low_power_timer_compare_register.set_bit(6);
+//        Self::get().low_power_timer_compare_register.set_bit(7);
+//        Self::get().low_power_timer_compare_register.set_bit(8);
 
         // Enable timer
         Self::get().low_power_timer_control_status_register.set_bit(0);

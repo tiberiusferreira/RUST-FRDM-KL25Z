@@ -17,7 +17,7 @@ cortex-m-semihosting = "*"
 
 [dependencies.cortex-m-rt]
 version = "*"
-features = ["abort-on-panic"]
+features= ["device"]
 
 
 # Uncomment for the device example.

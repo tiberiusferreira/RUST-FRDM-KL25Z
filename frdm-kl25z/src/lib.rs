@@ -64,13 +64,13 @@ pub trait FrdmKl25z{
     fn disable_watchdog_timer(&self);
 
     /* ***************************************************** */
-    /* Method name:        enable_low_power_timer_1hz        */
+    /* Method name:        enable_low_power_timer            */
     /* Method description: enable the low powertimer with    */
-    /*                     1hz frequency                     */
+    /*                     period_ms period                  */
     /* Input params:                                         */
     /* Output params:                                        */
     /* ***************************************************** */
-    fn enable_low_power_timer_1hz(&self);
+    fn enable_low_power_timer(&self, period_ms: u16);
 
 
     /* ***************************************************** */
@@ -163,8 +163,8 @@ impl FrdmKl25z for FrdmKl25zBoard{
     fn disable_watchdog_timer(&self){
         SystemIntegrationModule::disable_watchdog_timer();
     }
-    fn enable_low_power_timer_1hz(&self) {
-        lptm_0::Lptm0::init_1hz();
+    fn enable_low_power_timer(&self, period_ms: u16) {
+        lptm_0::Lptm0::init(period_ms);
     }
     fn clear_lptm_interrupt(){
         lptm_0::Lptm0::clear_current_interrupt();
