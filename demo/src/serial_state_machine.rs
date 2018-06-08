@@ -42,7 +42,7 @@ impl State {
         }
     }
     fn next(self, input: char, board: &Es670Board) -> State {
-        use State::*;
+        use self::State::*;
 
         match self {
             Idle => {

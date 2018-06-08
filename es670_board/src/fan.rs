@@ -40,6 +40,8 @@ impl Es670Board{
     /* ***************************************************** */
     pub fn init_fan_n_heater_as_pwm(&self){
         Tpm::init_tpm1_ch0_n_ch1_as_pwm();
+        // Make sure changes take effect before using it
+        self.delay(10);
     }
 
     /* ***************************************************** */

@@ -25,7 +25,8 @@ pub use frdm_kl25z::*;
 
 pub use frdm_kl25z::Value::{High, Low};
 pub struct Es670Board {
-    frdm_kl25z:  frdm_kl25z::FrdmKl25zBoard
+    frdm_kl25z:  frdm_kl25z::FrdmKl25zBoard,
+    adc_inited: bool
 }
 
 
@@ -41,7 +42,8 @@ impl Es670Board {
     /* ***************************************************** */
     pub fn new() -> Es670Board {
         let es670_board = Es670Board {
-            frdm_kl25z: FrdmKl25zBoard::new()
+            frdm_kl25z: FrdmKl25zBoard::new(),
+            adc_inited: false
         };
         es670_board.frdm_kl25z.disable_watchdog_timer();
         es670_board

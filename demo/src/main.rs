@@ -23,8 +23,8 @@ extern crate cortex_m;
 extern crate cortex_m_rt;
 extern crate cortex_m_semihosting;
 extern crate arraydeque;
-mod serial_state_machine;
-use serial_state_machine::*;
+//mod serial_state_machine;
+//use serial_state_machine::*;
 use cortex_m::asm;
 use es670_board::*;
 use arraydeque::{ArrayDeque, Saturating};
@@ -37,27 +37,6 @@ static mut PERIOD_ELAPSED: VolatileRW<bool> = es670_board::VolatileRW{
     value: UnsafeCell::new(false)
 };
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-*                   TABELA PARA USO DO SENSOR DE TEMPERATURA            *
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-const TABELA_TEMP :[u8; 256] = [
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,					//15
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,					//31
-    1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 5, 5, 6, 6, 6, 6,					//47
-    7, 7, 8, 8, 8, 8, 9, 9, 10, 10, 10, 10, 11, 11, 12, 12,			//63
-    12, 12, 13, 13, 14, 14, 15, 15, 15, 15, 16, 16, 16, 17, 17, 17,	//79
-    17, 18, 18, 19, 19, 19, 19, 20, 20, 21, 21, 21, 21, 22, 22, 23,	//95
-    23, 24, 24, 24, 24, 25, 25, 26, 26, 26, 26, 27, 27, 28, 28, 28,	//111
-    28, 29, 29, 30, 30, 30, 30, 31, 31, 32, 32, 32, 32, 33, 33, 34,	//127
-    34, 35, 35, 35, 35, 36, 36, 37, 37, 37, 37, 38, 38, 39, 39, 39,	//143
-    39, 40, 40, 41, 41, 41, 41, 42, 42, 43, 43, 44, 44, 44, 44, 45,	//159
-    45, 46, 46, 46, 46, 47, 47, 48, 48, 48, 48, 49, 49, 50, 50, 50,	//175
-    50, 51, 51, 52, 52, 53, 53, 53, 53, 54, 54, 55, 55, 55, 55, 56,	//191
-    56, 57, 57, 57, 57, 58, 58, 59, 59, 59, 59, 60, 60, 61, 61, 62,	//207
-    62, 62, 62, 63, 63, 64, 64, 64, 64, 65, 65, 66, 66, 66, 66, 67,	//223
-    67, 68, 68, 68, 68, 69, 69, 70, 70, 71, 71, 71, 71, 72, 72, 72,	//239
-    73, 73, 73, 73, 74, 74, 75, 75, 75, 75, 76, 76, 77, 77, 77, 77	//255
-];
 fn digit_to_char(u_int: u32) -> char{
     let u_int = u_int%10;
     match u_int {
@@ -134,19 +113,17 @@ pub static __INTERRUPTS: [Vector; 31] = [
 entry!(main);
 
 fn main() -> ! {
-    let board  = Es670Board::new();
+    let mut board  = Es670Board::new();
 
     board.turn_on_led(Led::RED);
     board.delay(100);
     board.turn_off_led(Led::RED);
-    board.enable_low_power_timer(500); // has 1hz frequency
+    board.enable_low_power_timer(500);
     Uart0::enable_uart(115200);
     board.init_fan_n_heater_as_pwm();
 
-    board.set_fan_speed(100);
+    board.set_fan_speed(40);
     board.set_heater_intensity(50);
-    Adc::init_adc();
-
 
     unsafe {
         INTERRUPTS_DEQUE = Some(ArrayDeque::<[char; 20]>::new());
@@ -155,23 +132,14 @@ fn main() -> ! {
 //    let mut state_machine = StateMachine::new();
 //    board.tachometer_start_counter();
 
-//    board.write("Ok!");
     loop {
         unsafe {
             while !PERIOD_ELAPSED.get() {}
             PERIOD_ELAPSED.set(false);
         }
-        Adc::init_conversion();
-        while !Adc::conversion_is_done() {
-
-        }
-        board.delay(100);
-        let result = Adc::get_result();
-        let result_usize = Adc::get_result() as usize;
-
-        let temp = TABELA_TEMP[result_usize];
+        let (raw_adc, temp) = board.get_heater_temp();
         Uart0::send_string("Valor ADC: ");
-        for c in u32_to_str(result as u32).iter(){
+        for c in u32_to_str(raw_adc as u32).iter(){
             Uart0::send_char(*c);
         }
         Uart0::send_char('\n');
@@ -182,17 +150,11 @@ fn main() -> ! {
         }
         Uart0::send_char('\n');
 
+//        board.delay(100);
+//        board.turn_on_led(Led::RED);
+//        board.delay(100);
+//        board.turn_off_led(Led::RED);
 
-
-
-//        board.delay(1000);
-//        unsafe {
-//            while !PERIOD_ELAPSED.get() {}
-//
-//            PERIOD_ELAPSED.set(false);
-//        }
-//        Uart0::disable_rx_interrupts();
-//
 //        unsafe {
 //            if let Some(ref mut deque) = INTERRUPTS_DEQUE{
 //                state_machine = mutate_state_machine_with_deque_chars(deque, state_machine);
@@ -264,6 +226,6 @@ pub extern "C" fn tpm0_irq_handler() {
 
 #[no_mangle]
 #[panic_implementation]
-fn panic(_info: &PanicInfo) -> ! {
+pub fn panic(_info: &PanicInfo) -> ! {
     unsafe { intrinsics::abort() }
 }
