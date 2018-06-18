@@ -23,6 +23,8 @@ extern crate cortex_m;
 extern crate cortex_m_rt;
 extern crate cortex_m_semihosting;
 extern crate arraydeque;
+mod controller;
+use controller::*;
 //mod serial_state_machine;
 //use serial_state_machine::*;
 use cortex_m::asm;
@@ -111,73 +113,53 @@ pub static __INTERRUPTS: [Vector; 31] = [
 ];
 
 entry!(main);
-
+const LOOP_PERIOD_MS: u16 = 300;
+const TARGET_RPM: u32 = 5000;
 fn main() -> ! {
     let mut board  = Es670Board::new();
 
     board.turn_on_led(Led::RED);
     board.delay(100);
     board.turn_off_led(Led::RED);
-    board.enable_low_power_timer(500);
+    board.enable_low_power_timer(LOOP_PERIOD_MS);
     Uart0::enable_uart(115200);
     board.init_fan_n_heater_as_pwm();
-
-    board.set_fan_speed(40);
-    board.set_heater_intensity(50);
+    board.tachometer_start_counter();
+    board.set_fan_speed(100);
+    board.lcd_clear();
 
     unsafe {
         INTERRUPTS_DEQUE = Some(ArrayDeque::<[char; 20]>::new());
     }
-//    Uart0::enable_rx_interrupts();
-//    let mut state_machine = StateMachine::new();
-//    board.tachometer_start_counter();
-
+    let mut controller = controller::Controller{
+        kp: 5,
+        ki: 1,
+        kd: 0,
+        accumulated_error: 0,
+        last_error: 0,
+    };
     loop {
         unsafe {
             while !PERIOD_ELAPSED.get() {}
             PERIOD_ELAPSED.set(false);
         }
-        let (raw_adc, temp) = board.get_heater_temp();
-        Uart0::send_string("Valor ADC: ");
-        for c in u32_to_str(raw_adc as u32).iter(){
-            Uart0::send_char(*c);
-        }
-        Uart0::send_char('\n');
-
-        Uart0::send_string("Valor Graus: ");
-        for c in u32_to_str(temp as u32).iter(){
-            Uart0::send_char(*c);
-        }
-        Uart0::send_char('\n');
-
-//        board.delay(100);
-//        board.turn_on_led(Led::RED);
-//        board.delay(100);
-//        board.turn_off_led(Led::RED);
-
-//        unsafe {
-//            if let Some(ref mut deque) = INTERRUPTS_DEQUE{
-//                state_machine = mutate_state_machine_with_deque_chars(deque, state_machine);
-//            }
-//        }
-//        Uart0::enable_rx_interrupts();
-//
-//
-//        board.lcd_clear();
-//        let counted_so_far = board.tachometer_counter_get_current_value();
-//        for c in u32_to_str(counted_so_far as u32).iter(){
-//            board.write_char(*c);
-//        }
-//        board.write_string_to_lcd(" RPS");
-//        board.lcd_set_cursor(1, 0);
-//        let counted_so_far_rpm = counted_so_far*60;
-//        for c in u32_to_str(counted_so_far_rpm as u32).iter(){
-//            board.write_char(*c);
-//        }
-//        board.write_string_to_lcd(" RPM");
-//        board.tachometer_counter_reset();
+        let rpm = get_rpm_and_print_to_lcd(&board);
+        let output = controller.tick(TARGET_RPM, rpm);
+        board.set_fan_speed(output);
     }
 
+}
+
+fn get_rpm_and_print_to_lcd(board: &es670_board::Es670Board) -> u32{
+    let rotations_since_last_iteration = board.tachometer_counter_get_current_value();
+    let rotations_per_second = rotations_since_last_iteration as f32 / (LOOP_PERIOD_MS as f32 / 1000.0);
+    let rotations_per_minute = rotations_per_second * 60.0;
+    let rpm = u32_to_str(rotations_per_minute as u32);
+    board.tachometer_counter_reset();
+    board.lcd_clear();
+    board.write_string_to_lcd("RPM:");
+    rpm.iter().for_each(|c| board.write_char(*c));
+    rotations_per_minute as u32
 }
 
 pub extern "C" fn default_handler() {
