@@ -27,7 +27,11 @@ impl Controller{
         let kp_contrib = self.kp*(error as f32);
 
         // Ki
-        self.accumulated_error = self.accumulated_error + error;
+        if self.ki > 0.0 {
+            self.accumulated_error = self.accumulated_error + error;
+        }else{
+            self.accumulated_error = 0;
+        }
         let ki_contrib = self.ki* (self.accumulated_error as f32);
 
         // Kd
