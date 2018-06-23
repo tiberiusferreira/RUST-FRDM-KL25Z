@@ -4,6 +4,7 @@ extern crate cortex_m_rt;
 extern crate cortex_m_semihosting;
 extern crate arraydeque;
 use es670_board::*;
+use super::Controller;
 use arraydeque::{ArrayDeque, Saturating, Array};
 pub enum State{
     Idle,
@@ -20,12 +21,22 @@ pub enum State{
     CoolerPwmFreq,
     CoolerPwmFreqDig1(u32),
     CoolerPwmFreqDig2(u32),
+    Kp,
+    KpDig1(u32),
+    KpDig2(u32),
+    Ki,
+    KiDig1(u32),
+    KiDig2(u32),
+    Kd,
+    KdDig1(u32),
+    KdDig2(u32),
 }
 
 
 pub struct StateMachine{
     state: State,
     board: Es670Board,
+    pub controller: Controller
 }
 
 impl State {
@@ -41,7 +52,7 @@ impl State {
             Uart0::send_char(c);
         }
     }
-    fn next(self, input: char, board: &Es670Board) -> State {
+    fn next(self, input: char, board: &Es670Board, controller: &mut Controller) -> State {
         use self::State::*;
 
         match self {
@@ -61,6 +72,15 @@ impl State {
                     },
                     'F' | 'f' => {
                         State::CoolerPwmFreq
+                    },
+                    'P' | 'p' => {
+                        State::Kp
+                    },
+                    'I' | 'i' => {
+                        State::Ki
+                    },
+                    'D' | 'd' => {
+                        State::Kd
                     },
                     _ => {
                         Self::send_err();
@@ -290,6 +310,114 @@ impl State {
                         State::Idle
                     },
                 }
+            },
+            Kp => {
+                match input.to_digit(10) {
+                    None => {
+                        Self::send_err();
+                        State::Idle
+                    },
+                    Some(digit) => {
+                        State::KpDig1(digit.clone()*100)
+                    },
+                }
+            },
+            KpDig1(digit2) => {
+                match input.to_digit(10) {
+                    None => {
+                        Self::send_err();
+                        State::Idle
+                    },
+                    Some(digit) => {
+                        State::KpDig2(digit2 + digit.clone()*10)
+                    },
+                }
+            },
+            KpDig2(digit21) => {
+                match input.to_digit(10) {
+                    None => {
+                        Self::send_err();
+                        State::Idle
+                    },
+                    Some(digit) => {
+                        Self::send_ack();
+                        let kp = digit21 + digit;
+                        controller.kp = (kp as f32)/100.0;
+                        State::Idle
+                    },
+                }
+            },
+            Ki => {
+                match input.to_digit(10) {
+                    None => {
+                        Self::send_err();
+                        State::Idle
+                    },
+                    Some(digit) => {
+                        State::KiDig1(digit.clone()*100)
+                    },
+                }
+            },
+            KiDig1(digit2) => {
+                match input.to_digit(10) {
+                    None => {
+                        Self::send_err();
+                        State::Idle
+                    },
+                    Some(digit) => {
+                        State::KiDig2(digit2 + digit.clone()*10)
+                    },
+                }
+            },
+            KiDig2(digit21) => {
+                match input.to_digit(10) {
+                    None => {
+                        Self::send_err();
+                        State::Idle
+                    },
+                    Some(digit) => {
+                        Self::send_ack();
+                        let ki = digit21 + digit;
+                        controller.ki = (ki as f32)/100.0;
+                        State::Idle
+                    },
+                }
+            },
+            Kd => {
+                match input.to_digit(10) {
+                    None => {
+                        Self::send_err();
+                        State::Idle
+                    },
+                    Some(digit) => {
+                        State::KdDig1(digit.clone()*100)
+                    },
+                }
+            },
+            KdDig1(digit2) => {
+                match input.to_digit(10) {
+                    None => {
+                        Self::send_err();
+                        State::Idle
+                    },
+                    Some(digit) => {
+                        State::KdDig2(digit2 + digit.clone()*10)
+                    },
+                }
+            },
+            KdDig2(digit21) => {
+                match input.to_digit(10) {
+                    None => {
+                        Self::send_err();
+                        State::Idle
+                    },
+                    Some(digit) => {
+                        Self::send_ack();
+                        let kd = digit21 + digit;
+                        controller.kd = (kd as f32)/100.0;
+                        State::Idle
+                    },
+                }
             }
         }
 
@@ -308,6 +436,7 @@ impl StateMachine{
         StateMachine{
             state: State::Idle,
             board: Es670Board::new(),
+            controller: Controller::new()
         }
     }
     /* ***************************************************** */
@@ -318,10 +447,12 @@ impl StateMachine{
     /* Input params:       input is the character input      */
     /* Output params:      A new mutated StateMachine        */
     /* ***************************************************** */
-    pub fn handle_input(self, input: char) -> StateMachine{
+    pub fn handle_input(mut self, input: char) -> StateMachine{
+        let state = self.state.next(input, &self.board,&mut self.controller);
         StateMachine{
-            state: self.state.next(input, &self.board),
+            state,
             board: self.board,
+            controller: self.controller
         }
     }
 }
