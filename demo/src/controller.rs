@@ -6,6 +6,7 @@ pub struct Controller{
     pub accumulated_error: i32,
     pub last_error: i32,
     pub last_output: u8,
+    pub goal: u32,
 }
 
 impl Controller{
@@ -17,12 +18,18 @@ impl Controller{
             accumulated_error: 0,
             last_error: 0,
             last_output: 0,
+            goal: 0,
         }
     }
-    pub fn tick(&mut self, target_value: u32, current_value: u32) -> u8{
-        let error = target_value as i32 - current_value as i32;
+    pub fn tick(&mut self, current_value: u32) -> u8{
+        let error = self.goal as i32 - current_value as i32;
 
-
+        if self.accumulated_error > <i32>::max_value() - 1000{
+            self.accumulated_error = <i32>::max_value() - 1000
+        }
+        if self.accumulated_error < <i32>::min_value() + 1000{
+            self.accumulated_error = <i32>::min_value() + 1000
+        }
         // Kp
         let kp_contrib = self.kp*(error as f32);
 

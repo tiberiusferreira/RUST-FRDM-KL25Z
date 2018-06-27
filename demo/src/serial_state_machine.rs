@@ -6,6 +6,7 @@ extern crate arraydeque;
 use es670_board::*;
 use super::Controller;
 use arraydeque::{ArrayDeque, Saturating, Array};
+const MAX_RPS : u32 = 100;
 pub enum State{
     Idle,
     LedCmd,
@@ -30,6 +31,9 @@ pub enum State{
     Kd,
     KdDig1(u32),
     KdDig2(u32),
+    Goal,
+    GoalDig1(u32),
+    GoalDig2(u32),
 }
 
 
@@ -81,6 +85,9 @@ impl State {
                     },
                     'D' | 'd' => {
                         State::Kd
+                    },
+                    'G' | 'g' => {
+                        State::Goal
                     },
                     _ => {
                         Self::send_err();
@@ -415,6 +422,46 @@ impl State {
                         Self::send_ack();
                         let kd = digit21 + digit;
                         controller.kd = (kd as f32)/100.0;
+                        State::Idle
+                    },
+                }
+            },
+            Goal => {
+                match input.to_digit(10) {
+                    None => {
+                        Self::send_err();
+                        State::Idle
+                    },
+                    Some(digit) => {
+                        State::GoalDig1(digit.clone()*100)
+                    },
+                }
+            },
+            GoalDig1(digit2) => {
+                match input.to_digit(10) {
+                    None => {
+                        Self::send_err();
+                        State::Idle
+                    },
+                    Some(digit) => {
+                        State::GoalDig2(digit2 + digit.clone()*10)
+                    },
+                }
+            },
+            GoalDig2(digit21) => {
+                match input.to_digit(10) {
+                    None => {
+                        Self::send_err();
+                        State::Idle
+                    },
+                    Some(digit) => {
+                        Self::send_ack();
+                        let mut goal = digit21 + digit;
+                        if goal > MAX_RPS{
+                            Uart0::send_string("\nWARNING: Requested RPS too high, defaulting to 100 RPS\n");
+                            goal = MAX_RPS;
+                        }
+                        controller.goal = goal;
                         State::Idle
                     },
                 }

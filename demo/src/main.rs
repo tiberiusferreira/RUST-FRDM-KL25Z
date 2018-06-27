@@ -110,7 +110,6 @@ pub static __INTERRUPTS: [Vector; 31] = [
 
 entry!(main);
 const LOOP_PERIOD_MS: u16 = 200;
-const TARGET_RPS: u32 = 90;
 fn main() -> ! {
     let board  = Es670Board::new();
 
@@ -144,7 +143,7 @@ fn main() -> ! {
         Uart0::enable_rx_interrupts();
 
         let rps = get_rps(&board);
-        let output = state_machine.controller.tick(TARGET_RPS, rps);
+        let output = state_machine.controller.tick(rps);
         board.set_fan_speed(output);
         write_controller_params_output_and_rps(&board, &state_machine.controller, rps);
     }
