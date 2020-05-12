@@ -1,4 +1,7 @@
-# `FRDM-KL25Z using RUST`
+# `Running Rust on the FRDM-KL25Z`
+
+
+![Demo](https://github.com/tiberiusferreira/RUST-FRDM-KL25Z/blob/master/ezgif.com-video-to-gif_hd.gif)
 
 This project aims to follow Rust's naming conventions: https://doc.rust-lang.org/1.0.0/style/style/naming/README.html
 
